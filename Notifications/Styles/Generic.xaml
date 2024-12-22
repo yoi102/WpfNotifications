@@ -1,0 +1,122 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Notifications.Controls"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <Style TargetType="{x:Type controls:Notification}">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
+        <Setter Property="Margin"
+                Value="0 0 0 12" />
+        <Setter Property="LayoutTransform">
+            <Setter.Value>
+                <ScaleTransform />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="5"
+                                  Direction="0"
+                                  ShadowDepth="0"
+                                  Opacity=".25" />
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0"
+                                         To="1"
+                                         Duration="0:0:.5" />
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
+                                         From="0"
+                                         To="1"
+                                         Duration="0:0:.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
+                                         From="0"
+                                         To="1"
+                                         Duration="0:0:.2" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="controls:Notification.NotificationCloseInvoked">
+                <BeginStoryboard>
+                    <Storyboard Duration="0:0:.1">
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
+                                         From="1"
+                                         To="0.1"
+                                         Duration="0:0:.2" />
+                    </Storyboard>
+                </BeginStoryboard>
+                <BeginStoryboard>
+                    <Storyboard BeginTime="0:0:.2">
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
+                                         From="1"
+                                         To="0"
+                                         Duration="0:0:.2" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type controls:NotificationArea}">
+        <Setter Property="Margin"
+                Value="0,0,8,8" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type controls:NotificationArea}">
+                    <controls:ReversibleStackPanel x:Name="PART_Items" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Position"
+                                 Value="TopLeft">
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Top" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Left" />
+                        </Trigger>
+                        <Trigger Property="Position"
+                                 Value="TopRight">
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Top" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Right" />
+                        </Trigger>
+                        <Trigger Property="Position"
+                                 Value="BottomLeft">
+                            <Setter TargetName="PART_Items"
+                                    Property="ReverseOrder"
+                                    Value="True" />
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Bottom" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Left" />
+                        </Trigger>
+                        <Trigger Property="Position"
+                                 Value="BottomRight">
+                            <Setter TargetName="PART_Items"
+                                    Property="ReverseOrder"
+                                    Value="True" />
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Bottom" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Right" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

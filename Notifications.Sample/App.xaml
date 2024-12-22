@@ -1,0 +1,16 @@
+﻿<Application x:Class="Notifications.Sample.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Notifications.Sample"
+             StartupUri="MainWindow.xaml"
+             >
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+            
+                <!--  VisionProcess.Controls  -->
+                <ResourceDictionary Source="pack://application:,,,/Notifications;component/Styles/Generic.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
