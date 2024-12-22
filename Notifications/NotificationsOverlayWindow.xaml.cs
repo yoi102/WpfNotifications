@@ -33,7 +33,7 @@ namespace Notifications
 
             exStyle |= (int)WindowExtensions.ExtendedWindowStyles.WS_EX_TOOLWINDOW;
 
-            wndHelper.Handle.SetWindowLong((int)WindowExtensions.GetWindowLongFields.GWL_EXSTYLE, (IntPtr)exStyle);
+            wndHelper.Handle.SetWindowLong((int)WindowExtensions.GetWindowLongFields.GWL_EXSTYLE, exStyle);
         }
     }
 }

@@ -2,13 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Notifications.Sample"
+             ShutdownMode="OnMainWindowClose"
              StartupUri="MainWindow.xaml"
              >
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
             
-                <!--  VisionProcess.Controls  -->
                 <ResourceDictionary Source="pack://application:,,,/Notifications;component/Styles/Generic.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
