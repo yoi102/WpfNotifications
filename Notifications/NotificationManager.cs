@@ -16,19 +16,24 @@ namespace Notifications
             _dispatcher = dispatcher;
         }
 
-        public void Show(Notification content, string areaIdentifier = "", TimeSpan? expirationTime = null, Action? onClick = null,
+        public async Task ShowAsync(Notification content, 
+            string areaIdentifier = "",
+            TimeSpan? expirationTime = null, 
+            Action? onClick = null,
             Action? onClose = null)
         {
-            if (!_dispatcher.CheckAccess())
-            {
-                _dispatcher.BeginInvoke(
-                    new Action(() => Show(content, areaIdentifier, expirationTime, onClick, onClose)));
-                return;
-            }
             if (content == null)
             {
                 throw new Exception();
             }
+
+            if (!_dispatcher.CheckAccess())
+            {
+                _dispatcher.BeginInvoke(
+                    () => ShowAsync(content, areaIdentifier, expirationTime, onClick, onClose)).Wait();
+                return;
+            }
+           
             if (expirationTime == null) expirationTime = TimeSpan.FromSeconds(5);
 
 
@@ -56,7 +61,7 @@ namespace Notifications
 
             foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier))
             {
-                area.Show(content, (TimeSpan)expirationTime, onClick, onClose);
+               await area.ShowAsync(content, (TimeSpan)expirationTime, onClick, onClose);
             }
         }
 

@@ -3,6 +3,7 @@
                     xmlns:controls="clr-namespace:Notifications.Controls"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
 
+
     <Style TargetType="{x:Type controls:Notification}">
         <Setter Property="UseLayoutRounding"
                 Value="True" />
@@ -23,6 +24,7 @@
                                   Opacity=".25" />
             </Setter.Value>
         </Setter>
+
         <Style.Triggers>
             <EventTrigger RoutedEvent="Loaded">
                 <BeginStoryboard>
@@ -61,6 +63,7 @@
                 </BeginStoryboard>
             </EventTrigger>
         </Style.Triggers>
+
     </Style>
 
     <Style TargetType="{x:Type controls:NotificationArea}">

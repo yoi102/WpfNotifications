@@ -9,47 +9,28 @@ using System.Windows;
 
 namespace Notifications.Controls
 {
+    public enum NotificationPosition
+    {
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight
+    }
+
     public class NotificationArea : Control
     {
-
-
-        public string Identifier
-        {
-            get { return (string)GetValue(IdentifierProperty); }
-            set { SetValue(IdentifierProperty, value); }
-        }
-
         // Using a DependencyProperty as the backing store for Identifier.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IdentifierProperty =
             DependencyProperty.Register("Identifier", typeof(string), typeof(NotificationArea), new PropertyMetadata(""));
 
-
-        public NotificationPosition Position
-        {
-            get { return (NotificationPosition)GetValue(PositionProperty); }
-            set { SetValue(PositionProperty, value); }
-        }
+        public static readonly DependencyProperty MaxItemsProperty =
+            DependencyProperty.Register("MaxItems", typeof(uint), typeof(NotificationArea), new PropertyMetadata(uint.MaxValue));
 
         // Using a DependencyProperty as the backing store for Position.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty PositionProperty =
             DependencyProperty.Register("Position", typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
 
-
-        public uint MaxItems
-        {
-            get { return (uint)GetValue(MaxItemsProperty); }
-            set { SetValue(MaxItemsProperty, value); }
-        }
-
-        public static readonly DependencyProperty MaxItemsProperty =
-            DependencyProperty.Register("MaxItems", typeof(uint), typeof(NotificationArea), new PropertyMetadata(uint.MaxValue));
-
         private IList _items = null!;
-
-        public NotificationArea()
-        {
-            NotificationManager.AddArea(this);
-        }
 
         static NotificationArea()
         {
@@ -57,18 +38,38 @@ namespace Notifications.Controls
                 new FrameworkPropertyMetadata(typeof(NotificationArea)));
         }
 
+        public NotificationArea()
+        {
+            NotificationManager.AddArea(this);
+        }
+
+        public string Identifier
+        {
+            get { return (string)GetValue(IdentifierProperty); }
+            set { SetValue(IdentifierProperty, value); }
+        }
+        public uint MaxItems
+        {
+            get { return (uint)GetValue(MaxItemsProperty); }
+            set { SetValue(MaxItemsProperty, value); }
+        }
+
+        public NotificationPosition Position
+        {
+            get { return (NotificationPosition)GetValue(PositionProperty); }
+            set { SetValue(PositionProperty, value); }
+        }
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            var itemsControl = GetTemplateChild("PART_Items") as Panel;
-            if (itemsControl is null )
+            if (GetTemplateChild("PART_Items") is not Panel itemsControl)
             {
                 throw new ApplicationException();
             }
             _items = itemsControl.Children;
         }
 
-        public async void Show(Notification content, TimeSpan expirationTime, Action? onClick, Action? onClose)
+        public async Task ShowAsync(Notification content, TimeSpan expirationTime, Action? onClick, Action? onClose)
         {
             var notification = content;
 
@@ -81,11 +82,9 @@ namespace Notifications.Controls
 
             notification.MouseLeftButtonDown += (sender, args) =>
             {
-                if (onClick != null)
-                {
-                    onClick.Invoke();
-                    (sender as Notification)?.CloseAsync();
-                }
+                onClick?.Invoke();
+                (sender as Notification)?.InternalCloseAsync();
+
             };
             notification.NotificationClosed += (sender, args) => onClose?.Invoke();
             notification.NotificationClosed += OnNotificationClosed;
@@ -108,19 +107,11 @@ namespace Notifications.Controls
 
                 if (_items.OfType<Notification>().Count(i => !i.IsClosing) > MaxItems)
                 {
-                    _items.OfType<Notification>().First(i => !i.IsClosing).CloseAsync();
+                    _items.OfType<Notification>().First(i => !i.IsClosing).InternalCloseAsync().Wait();
                 }
             }
 
-
-            if (expirationTime == TimeSpan.MaxValue)
-            {
-                return;
-            }
-            await Task.Delay(expirationTime);
-
-            notification.CloseAsync();
-
+           await notification.CloseAsync(expirationTime);
         }
 
         private void OnNotificationClosed(object sender, RoutedEventArgs routedEventArgs)
@@ -128,14 +119,5 @@ namespace Notifications.Controls
             var notification = sender as Notification;
             _items.Remove(notification);
         }
-
-    }
-
-    public enum NotificationPosition
-    {
-        TopLeft,
-        TopRight,
-        BottomLeft,
-        BottomRight
     }
 }

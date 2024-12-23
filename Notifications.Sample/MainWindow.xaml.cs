@@ -17,7 +17,7 @@ namespace Notifications.Sample
     /// </summary>
     public partial class MainWindow : Window
     {
-        private NotificationManager notificationManager;
+        private readonly NotificationManager notificationManager;
 
         public MainWindow()
         {
@@ -26,16 +26,16 @@ namespace Notifications.Sample
             notificationManager = new NotificationManager();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            InformationMessage message = new InformationMessage();
-            notificationManager.Show(message, "aasdssd");
+            SuccessMessage message = new SuccessMessage();
+            await notificationManager.ShowAsync(message, "aasdssd");
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private async void Button_Click_1(object sender, RoutedEventArgs e)
         {
             ErrorMessage message = new ErrorMessage();
-            notificationManager.Show(message);
+            await notificationManager.ShowAsync(message);
 
         }
     }

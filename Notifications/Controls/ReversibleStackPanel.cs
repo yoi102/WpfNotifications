@@ -10,18 +10,14 @@ namespace Notifications.Controls
 {
     public class ReversibleStackPanel : StackPanel
     {
-
+        public static readonly DependencyProperty ReverseOrderProperty =
+            DependencyProperty.Register("ReverseOrder", typeof(bool), typeof(ReversibleStackPanel), new PropertyMetadata(false));
 
         public bool ReverseOrder
         {
             get { return (bool)GetValue(ReverseOrderProperty); }
             set { SetValue(ReverseOrderProperty, value); }
         }
-
-        public static readonly DependencyProperty ReverseOrderProperty =
-            DependencyProperty.Register("ReverseOrder", typeof(bool), typeof(ReversibleStackPanel), new PropertyMetadata(false));
-
-
         protected override Size ArrangeOverride(Size arrangeSize)
         {
             double x = 0;
