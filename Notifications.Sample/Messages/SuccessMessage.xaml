@@ -8,8 +8,21 @@
                  mc:Ignorable="d"
                  Width="300"
                  Height="100"
+                 Name="notification"
                  d:DesignHeight="100"
                  d:DesignWidth="300">
+    <yr:Notification.Triggers>
+        <EventTrigger RoutedEvent="yr:Notification.NotificationClosing">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="colorBar"
+                                     Storyboard.TargetProperty="Width"
+                                     To="0"
+                                     Duration="{Binding ElementName=notification, Path=ExpirationTime}" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </yr:Notification.Triggers>
     <Border CornerRadius="10"
             Background="Wheat">
         <Grid Margin="5">
@@ -24,26 +37,13 @@
                            Fill="LightGreen"
                            VerticalAlignment="Center"
                            HorizontalAlignment="Left">
-                    <Rectangle.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
-                        <!--<EventTrigger RoutedEvent="yr:Notification.NotificationClosing">-->
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="Width"
-                                                     To="0"
-                                                     Duration="0:0:5" />
-                                    <!--Duration="{Binding RelativeSource={RelativeSource Mode=Self}, Path=ExpirationTime}" />-->
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Rectangle.Triggers>
                 </Rectangle>
 
                 <TextBlock Text="Title: Success"
                            VerticalAlignment="Center" />
 
             </Grid>
-           
+
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.3*" />
@@ -61,4 +61,4 @@
 
         </Grid>
     </Border>
-    </yr:Notification>
+</yr:Notification>

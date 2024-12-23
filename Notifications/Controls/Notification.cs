@@ -6,15 +6,12 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows;
+using System.ComponentModel;
 
 namespace Notifications.Controls
 {
-    public class Notification : ContentControl
+    public class Notification : ContentControl, INotifyPropertyChanged
     {
-        // Using a DependencyProperty as the backing store for ExpirationTime.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty ExpirationTimeProperty =
-            DependencyProperty.Register("ExpirationTime", typeof(TimeSpan), typeof(Notification), new PropertyMetadata(TimeSpan.FromSeconds(5)));
-
         public static readonly RoutedEvent NotificationClosedEvent = EventManager.RegisterRoutedEvent(
             "NotificationClosed", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
 
@@ -25,6 +22,8 @@ namespace Notifications.Controls
            "NotificationClosing", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
 
         private TimeSpan _closingAnimationTime = TimeSpan.Zero;
+
+        private Duration expirationTime;
 
         public event RoutedEventHandler NotificationClosed
         {
@@ -44,25 +43,24 @@ namespace Notifications.Controls
             remove { RemoveHandler(NotificationClosingEvent, value); }
         }
 
-        public TimeSpan ExpirationTime
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public Duration ExpirationTime
         {
-            get { return (TimeSpan)GetValue(ExpirationTimeProperty); }
-            set { SetValue(ExpirationTimeProperty, value); }
+            get { return expirationTime; }
+            set
+            {
+                expirationTime = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExpirationTime"));
+            }
         }
 
         public bool IsClosing { get; set; }
 
-        public override void OnApplyTemplate()
-        {
-            base.OnApplyTemplate();
-
-            var storyboards = Style.Triggers.OfType<EventTrigger>().FirstOrDefault(t => t.RoutedEvent == NotificationCloseInvokedEvent)?.Actions.OfType<BeginStoryboard>().Select(a => a.Storyboard);
-            _closingAnimationTime = new TimeSpan(storyboards?.Max(s => Math.Min((s.Duration.HasTimeSpan ? s.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero) : TimeSpan.MaxValue).Ticks, s.Children.Select(ch => ch.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero)).Max().Ticks)) ?? 0);
-        }
-
         public virtual async Task CloseAsync(TimeSpan expirationTime)
         {
             ExpirationTime = expirationTime;
+
             RaiseEvent(new RoutedEventArgs(NotificationClosingEvent));
 
             if (expirationTime == TimeSpan.MaxValue)
@@ -71,7 +69,15 @@ namespace Notifications.Controls
             }
             await Task.Delay(expirationTime);
 
-           await InternalCloseAsync();
+            await InternalCloseAsync();
+        }
+
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
+
+            var storyboards = Style.Triggers.OfType<EventTrigger>().FirstOrDefault(t => t.RoutedEvent == NotificationCloseInvokedEvent)?.Actions.OfType<BeginStoryboard>().Select(a => a.Storyboard);
+            _closingAnimationTime = new TimeSpan(storyboards?.Max(s => Math.Min((s.Duration.HasTimeSpan ? s.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero) : TimeSpan.MaxValue).Ticks, s.Children.Select(ch => ch.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero)).Max().Ticks)) ?? 0);
         }
 
         internal async Task InternalCloseAsync()
