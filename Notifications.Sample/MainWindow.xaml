@@ -27,6 +27,7 @@
 
         </Grid>
         <yr:NotificationArea Identifier="aasdssd"
+                             MaxItems="3"
                              Position="BottomRight"
                              Panel.ZIndex="9999" />
     </Grid>

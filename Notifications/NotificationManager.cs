@@ -30,7 +30,7 @@ namespace Notifications
             if (!_dispatcher.CheckAccess())
             {
                 _dispatcher.BeginInvoke(
-                    () => ShowAsync(content, areaIdentifier, expirationTime, onClick, onClose)).Wait();
+                    () => ShowAsync(content, areaIdentifier, expirationTime, onClick, onClose)).GetAwaiter();
                 return;
             }
            
@@ -59,7 +59,7 @@ namespace Notifications
 
             if (_areas == null) return;
 
-            foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier))
+            foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier).ToArray())
             {
                await area.ShowAsync(content, (TimeSpan)expirationTime, onClick, onClose);
             }

@@ -107,7 +107,7 @@ namespace Notifications.Controls
 
                 if (_items.OfType<Notification>().Count(i => !i.IsClosing) > MaxItems)
                 {
-                    _items.OfType<Notification>().First(i => !i.IsClosing).InternalCloseAsync().Wait();
+                    _items.OfType<Notification>().First(i => !i.IsClosing).InternalCloseAsync().GetAwaiter();
                 }
             }
 
