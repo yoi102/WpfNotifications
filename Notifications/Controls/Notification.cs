@@ -12,8 +12,12 @@ namespace Notifications.Controls
 {
     public class Notification : ContentControl, INotifyPropertyChanged
     {
+        // Using a DependencyProperty as the backing store for ExpirationTime.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ExpirationTimeProperty =
+            DependencyProperty.Register("ExpirationTime", typeof(Duration), typeof(Notification), new PropertyMetadata(new Duration(TimeSpan.FromSeconds(1))));
+
         public static readonly RoutedEvent NotificationClosedEvent = EventManager.RegisterRoutedEvent(
-            "NotificationClosed", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
+                    "NotificationClosed", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
 
         public static readonly RoutedEvent NotificationCloseInvokedEvent = EventManager.RegisterRoutedEvent(
             "NotificationCloseInvoked", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
@@ -47,20 +51,14 @@ namespace Notifications.Controls
 
         public Duration ExpirationTime
         {
-            get { return expirationTime; }
-            set
-            {
-                expirationTime = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ExpirationTime"));
-            }
+            get { return (Duration)GetValue(ExpirationTimeProperty); }
+            set { SetValue(ExpirationTimeProperty, value); }
         }
-
         public bool IsClosing { get; set; }
 
         public virtual async Task CloseAsync(TimeSpan expirationTime)
         {
             ExpirationTime = expirationTime;
-
             RaiseEvent(new RoutedEventArgs(NotificationClosingEvent));
 
             if (expirationTime == TimeSpan.MaxValue)
