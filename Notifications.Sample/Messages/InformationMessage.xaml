@@ -46,10 +46,9 @@
                     <ColumnDefinition Width="0.3*" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Path HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      Data="M 10.968748 8.9809305e-8 C 4.9320181 8.9809305e-8 -1.9073487e-6 4.9320201 -1.9073487e-6 10.96875 c 0 6.03672 4.9322600073487 10.9668 10.9687499073487 10.9668 6.03648 0 10.96875 -4.93008 10.96875 -10.9668 C 21.937498 4.9320201 17.005458 8.9809305e-8 10.968748 8.9809305e-8 Z m 0 2.000000010190695 c 4.95043 0 8.96875 4.0183 8.96875 8.9687499 0 4.95044 -4.01809 8.9668 -8.96875 8.9668 -4.9506899 0 -8.9687499 -4.01636 -8.9687499 -8.9668 0 -4.9504499 4.0183 -8.9687499 8.9687499 -8.9687499 z m -1.4999999 2.49805 0 3 2.9999999 0 0 -3 -2.9999999 0 z m 0 4.4707 0 8.9101599 2.9999999 0 0 -8.9101599 -2.9999999 0 z"
-                      Fill="White" />
+                <ContentControl HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Content="{StaticResource InfoIcon}" />
                 <TextBlock VerticalAlignment="Center"
                            Grid.Column="1"
                            TextWrapping="Wrap"

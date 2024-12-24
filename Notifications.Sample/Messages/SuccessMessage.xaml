@@ -47,10 +47,9 @@
                     <ColumnDefinition Width="0.3*" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Path HorizontalAlignment="Center"
-                      VerticalAlignment="Center"
-                      Data="M 15.56055 5.9323048e-7 7.53125 10.197261 2.73242 5.2304706 0 7.8710906 7.82422 15.968751 18.54492 2.3515606 15.56055 5.9323048e-7 Z"
-                      Fill="White" />
+                <ContentControl HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Content="{StaticResource SuccessIcon}" />
                 <TextBlock VerticalAlignment="Center"
                            Grid.Column="1"
                            TextWrapping="Wrap"
