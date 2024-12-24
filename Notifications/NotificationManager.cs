@@ -1,4 +1,5 @@
 ﻿using Notifications.Controls;
+using Notifications.Enums;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -9,6 +10,7 @@ namespace Notifications
         private static readonly List<NotificationArea> _areas = [];
         private static NotificationsOverlayWindow? _window;
         private readonly Dispatcher _dispatcher;
+
         public NotificationManager(Dispatcher? dispatcher = null)
         {
             dispatcher ??= Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
@@ -16,11 +18,29 @@ namespace Notifications
             _dispatcher = dispatcher;
         }
 
-        public async Task ShowAsync(Notification content, 
-            string areaIdentifier = "",
-            TimeSpan? expirationTime = null, 
-            Action? onClick = null,
-            Action? onClose = null)
+        public async Task ShowAsync(string title,
+                            string message,
+                            NotificationType notificationType,
+                            string areaIdentifier = "",
+                            TimeSpan? expirationTime = null,
+                            Action? onClick = null,
+                            Action? onClose = null)
+        {
+            NotificationContent notificationContent = new()
+            {
+                Title = title,
+                Message = message,
+                Type = notificationType
+            };
+
+            await ShowAsync(notificationContent, areaIdentifier, expirationTime, onClick, onClose);
+        }
+
+        public async Task ShowAsync(object content,
+                                    string areaIdentifier = "",
+                                    TimeSpan? expirationTime = null,
+                                    Action? onClick = null,
+                                    Action? onClose = null)
         {
             if (content == null)
             {
@@ -33,9 +53,8 @@ namespace Notifications
                     () => ShowAsync(content, areaIdentifier, expirationTime, onClick, onClose)).GetAwaiter();
                 return;
             }
-           
-            if (expirationTime == null) expirationTime = TimeSpan.FromSeconds(5);
 
+            if (expirationTime == null) expirationTime = TimeSpan.FromSeconds(5);
 
             if (areaIdentifier == string.Empty && _window == null)
             {
@@ -61,7 +80,7 @@ namespace Notifications
 
             foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier).ToArray())
             {
-               await area.ShowAsync(content, (TimeSpan)expirationTime, onClick, onClose);
+                await area.ShowAsync(content, (TimeSpan)expirationTime, onClick, onClose);
             }
         }
 

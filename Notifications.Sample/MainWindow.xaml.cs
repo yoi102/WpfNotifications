@@ -26,17 +26,57 @@ namespace Notifications.Sample
             notificationManager = new NotificationManager();
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private static object RandomCustomMessage()
         {
-            SuccessMessage message = new SuccessMessage();
-            await notificationManager.ShowAsync(message, "aasdssd");
+            object message;
+            Random random = new Random();
+            var type = random.Next(0, 4);
+            switch (type)
+            {
+                case 0:
+                    message = new InformationMessage();
+                    break;
+
+                case 1:
+                    message = new SuccessMessage();
+                    break;
+
+                case 2:
+                    message = new WarningMessage();
+                    break;
+
+                case 3:
+                    message = new ErrorMessage();
+                    break;
+
+                default:
+                    throw new ApplicationException();
+            }
+
+            return message;
         }
 
-        private async void Button_Click_1(object sender, RoutedEventArgs e)
+        private async void CustomButtonClick(object sender, RoutedEventArgs e)
         {
-            ErrorMessage message = new ErrorMessage();
+            var message = RandomCustomMessage();
             await notificationManager.ShowAsync(message);
+        }
 
+        private async void CustomInWindowButtonClick(object sender, RoutedEventArgs e)
+        {
+            var message = RandomCustomMessage();
+            await notificationManager.ShowAsync(message, "main_window");
+        }
+        private async void MessageButtonClick(object sender, RoutedEventArgs e)
+        {
+            await notificationManager.ShowAsync("title");
+        }
+
+        private async void MessageWithTitleButtonClick(object sender, RoutedEventArgs e)
+        {
+            Random random = new Random();
+            var type = (Enums.NotificationType)random.Next(0, 4);
+            await notificationManager.ShowAsync("title", "message", type);
         }
     }
 }

@@ -1,21 +1,10 @@
-﻿using System;
+﻿using Notifications.Enums;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Notifications.Controls
 {
-    public enum NotificationPosition
-    {
-        TopLeft,
-        TopRight,
-        BottomLeft,
-        BottomRight
-    }
 
     public class NotificationArea : Control
     {
@@ -69,15 +58,20 @@ namespace Notifications.Controls
             _items = itemsControl.Children;
         }
 
-        public async Task ShowAsync(Notification content, TimeSpan expirationTime, Action? onClick, Action? onClose)
+        public async Task ShowAsync(object content, TimeSpan expirationTime, Action? onClick, Action? onClose)
         {
-            var notification = content;
-
-            if (content.Style is null)
+            if (content is not Notification notification)
             {
-                Style style = (Style)this.FindResource(typeof(Notification));
+                notification = new()
+                {
+                    Content = content
+                };
+            }
+            if (notification.Style is null)
+            {
+                Style style = (Style)this.FindResource("NotificationBase");
 
-                content.Style = style;
+                notification.Style = style;
             }
 
             notification.MouseLeftButtonDown += (sender, args) =>
@@ -111,7 +105,7 @@ namespace Notifications.Controls
                 }
             }
 
-           await notification.CloseAsync(expirationTime);
+            await notification.CloseAsync(expirationTime);
         }
 
         private void OnNotificationClosed(object sender, RoutedEventArgs routedEventArgs)

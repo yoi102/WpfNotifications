@@ -9,6 +9,6 @@ namespace Notifications
 {
     public interface INotificationManager
     {
-        Task ShowAsync(Notification content, string areaName = "", TimeSpan? expirationTime = null, Action? onClick = null, Action? onClose = null);
+        Task ShowAsync(object content, string areaName = "", TimeSpan? expirationTime = null, Action? onClick = null, Action? onClose = null);
     }
 }

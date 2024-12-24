@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Notifications
+namespace Notifications.Extensions
 {
     internal static class WindowExtensions
     {

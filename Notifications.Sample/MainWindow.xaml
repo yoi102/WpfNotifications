@@ -11,22 +11,26 @@
         Width="800">
     <Grid>
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
+        <UniformGrid>
+            
 
             <Button Margin="20"
-                    Content="b1"
-                    Click="Button_Click" />
-            <Button Grid.Column="1"
+                    Content="CustomInWindow"
+                    Click="CustomInWindowButtonClick" />
+            <Button 
                     Margin="20"
-                    Content="b2"
-                    Click="Button_Click_1" />
+                    Content="Custom"
+                    Click="CustomButtonClick" />
+            <Button 
+                    Margin="20"
+                    Content="Message"
+                    Click="MessageButtonClick" />
+            <Button Margin="20"
+                    Content="MessageWithTitle"
+                    Click="MessageWithTitleButtonClick" />
 
-        </Grid>
-        <yr:NotificationArea Identifier="aasdssd"
+        </UniformGrid>
+        <yr:NotificationArea Identifier="main_window"
                              MaxItems="3"
                              Position="BottomRight"
                              Panel.ZIndex="9999" />

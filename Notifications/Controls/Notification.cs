@@ -75,9 +75,7 @@ namespace Notifications.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-
-            var storyboards = Style.Triggers.OfType<EventTrigger>().FirstOrDefault(t => t.RoutedEvent == NotificationCloseInvokedEvent)?.Actions.OfType<BeginStoryboard>().Select(a => a.Storyboard);
-            _closingAnimationTime = new TimeSpan(storyboards?.Max(s => Math.Min((s.Duration.HasTimeSpan ? s.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero) : TimeSpan.MaxValue).Ticks, s.Children.Select(ch => ch.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero)).Max().Ticks)) ?? 0);
+            _closingAnimationTime = GetClosingAnimationTime(this, NotificationCloseInvokedEvent);
         }
 
         internal async Task InternalCloseAsync()
@@ -91,6 +89,42 @@ namespace Notifications.Controls
             RaiseEvent(new RoutedEventArgs(NotificationCloseInvokedEvent));
             await Task.Delay(_closingAnimationTime);
             RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
+        }
+
+        private TimeSpan GetClosingAnimationTime(FrameworkElement element, RoutedEvent notificationCloseEvent)
+        {
+            Style currentStyle = element.Style;
+            while (currentStyle != null)
+            {
+                // 获取 Triggers 中匹配的 EventTrigger 和对应的 Storyboard
+                var storyboards = currentStyle.Triggers
+                    .OfType<EventTrigger>()
+                    .FirstOrDefault(t => t.RoutedEvent == notificationCloseEvent)?
+                    .Actions
+                    .OfType<BeginStoryboard>()
+                    .Select(a => a.Storyboard);
+
+                // 如果找到了有效的 Storyboards，计算 _closingAnimationTime
+                if (storyboards != null)
+                {
+                    return new TimeSpan(storyboards.Max(s =>
+                        Math.Min(
+                            (s.Duration.HasTimeSpan
+                                ? s.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero)
+                                : TimeSpan.MaxValue).Ticks,
+                            s.Children.Select(ch =>
+                                ch.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero))
+                            .Max().Ticks
+                        )
+                    ));
+                }
+
+                // 向上查找基类 Style
+                currentStyle = currentStyle.BasedOn;
+            }
+
+            // 如果未找到任何有效的触发器，返回默认值
+            return TimeSpan.Zero;
         }
     }
 }
