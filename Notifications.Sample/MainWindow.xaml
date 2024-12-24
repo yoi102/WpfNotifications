@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:yr="clr-namespace:Notifications.Controls;assembly=Notifications"
+        xmlns:yr="https://github.com/yoi102/xaml/controls"
         xmlns:local="clr-namespace:Notifications.Sample"
         mc:Ignorable="d"
         Title="MainWindow"
