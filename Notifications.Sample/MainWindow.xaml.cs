@@ -26,6 +26,7 @@ namespace Notifications.Sample
 
             notificationManager = new NotificationManager();
             NotificationConstants.NotificationsOverlayWindowNotificationPosition = Enums.NotificationPosition.TopRight;
+            NotificationConstants.NotificationsOverlayWindowMaxCount = 7;
         }
 
         private static object RandomCustomMessage()
