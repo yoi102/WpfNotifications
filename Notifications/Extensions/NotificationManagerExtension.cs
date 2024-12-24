@@ -1,15 +1,9 @@
 ﻿using Notifications.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Notifications.Extensions
 {
     public static class NotificationManagerExtension
     {
-
         public static async Task ShowAsync(this NotificationManager notificationManager,
                                     string title,
                                     string message,
@@ -29,7 +23,6 @@ namespace Notifications.Extensions
             await notificationManager.ShowAsync(notificationContent, areaIdentifier, expirationTime, onClick, onClose);
         }
 
-
         public static async Task ShowAsync(this NotificationManager notificationManager,
                             string message,
                             string areaIdentifier = "",
@@ -39,10 +32,5 @@ namespace Notifications.Extensions
         {
             await notificationManager.ShowAsync(message, areaIdentifier, expirationTime, onClick, onClose);
         }
-
-
-
-
-
     }
 }

@@ -12,23 +12,21 @@
     <Grid>
 
         <UniformGrid>
-            
 
             <Button Margin="20"
                     Content="CustomInWindow"
                     Click="CustomInWindowButtonClick" />
-            <Button 
+            <Button
                     Margin="20"
                     Content="Custom"
                     Click="CustomButtonClick" />
-            <Button 
+            <Button
                     Margin="20"
                     Content="Message"
                     Click="MessageButtonClick" />
             <Button Margin="20"
                     Content="MessageWithTitle"
                     Click="MessageWithTitleButtonClick" />
-
         </UniformGrid>
         <yr:NotificationArea Identifier="main_window"
                              MaxItems="3"

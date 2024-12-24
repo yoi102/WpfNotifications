@@ -1,15 +1,7 @@
 ﻿using Notifications.Constants;
 using Notifications.Sample.Messages;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Notifications.Sample
 {
@@ -74,6 +66,7 @@ namespace Notifications.Sample
             var message = RandomCustomMessage();
             await notificationManager.ShowAsync(message, "main_window");
         }
+
         private async void MessageButtonClick(object sender, RoutedEventArgs e)
         {
             await notificationManager.ShowAsync("title");

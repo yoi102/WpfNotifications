@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
-using System.Windows;
-using System.ComponentModel;
 
 namespace Notifications.Controls
 {
@@ -54,6 +49,7 @@ namespace Notifications.Controls
             get { return (Duration)GetValue(ExpirationTimeProperty); }
             set { SetValue(ExpirationTimeProperty, value); }
         }
+
         public bool IsClosing { get; set; }
 
         public virtual async Task CloseAsync(TimeSpan expirationTime)

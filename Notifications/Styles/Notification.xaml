@@ -1,9 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="clr-namespace:Notifications.Controls"
-                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:noti="clr-namespace:Notifications"
                     xmlns:constants="clr-namespace:Notifications.Constants"
-                    xmlns:noti="clr-namespace:Notifications">
+                    xmlns:controls="clr-namespace:Notifications.Controls"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <Path x:Key="ErrorIcon"
           Data="M 2.6874995 2.8246546e-7 -4.7683716e-7 2.6855503 5.3007795 7.9863303 -4.7683716e-7 13.28516 2.6874995 15.97266 l 5.29883 -5.30079 5.3007805 5.30079 2.68554 -2.6875 -5.29882 -5.2988297 5.29882 -5.30078 L 13.28711 2.8246546e-7 7.9863295 5.2988303 2.6874995 2.8246546e-7 Z"

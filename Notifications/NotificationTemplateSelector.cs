@@ -7,6 +7,7 @@ namespace Notifications
     {
         private DataTemplate? _defaultNotificationTemplate;
         private DataTemplate? _defaultStringTemplate;
+
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
             if (_defaultStringTemplate == null && _defaultNotificationTemplate == null)

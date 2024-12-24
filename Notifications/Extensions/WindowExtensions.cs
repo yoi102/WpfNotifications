@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Notifications.Extensions
 {
@@ -12,6 +11,7 @@ namespace Notifications.Extensions
         {
             // ...
             WS_EX_TOOLWINDOW = 0x00000080,
+
             // ...
         }
 
@@ -19,6 +19,7 @@ namespace Notifications.Extensions
         {
             // ...
             GWL_EXSTYLE = -20,
+
             // ...
         }
 
@@ -68,7 +69,6 @@ namespace Notifications.Extensions
         [DllImport("kernel32.dll", EntryPoint = "SetLastError")]
         public static extern void SetLastError(int dwErrorCode);
 
-        #endregion
-
+        #endregion Window styles : hide alt+tab toastwindow
     }
 }

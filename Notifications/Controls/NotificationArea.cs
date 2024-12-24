@@ -5,7 +5,6 @@ using System.Windows.Controls;
 
 namespace Notifications.Controls
 {
-
     public class NotificationArea : Control
     {
         // Using a DependencyProperty as the backing store for Identifier.  This enables animation, styling, binding, etc...
@@ -37,6 +36,7 @@ namespace Notifications.Controls
             get { return (string)GetValue(IdentifierProperty); }
             set { SetValue(IdentifierProperty, value); }
         }
+
         public uint MaxItems
         {
             get { return (uint)GetValue(MaxItemsProperty); }
@@ -48,6 +48,7 @@ namespace Notifications.Controls
             get { return (NotificationPosition)GetValue(PositionProperty); }
             set { SetValue(PositionProperty, value); }
         }
+
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
@@ -78,7 +79,6 @@ namespace Notifications.Controls
             {
                 onClick?.Invoke();
                 (sender as Notification)?.InternalCloseAsync();
-
             };
             notification.NotificationClosed += (sender, args) => onClose?.Invoke();
             notification.NotificationClosed += OnNotificationClosed;

@@ -13,6 +13,7 @@ namespace Notifications.Controls
             get { return (bool)GetValue(ReverseOrderProperty); }
             set { SetValue(ReverseOrderProperty, value); }
         }
+
         protected override Size ArrangeOverride(Size arrangeSize)
         {
             double x = 0;
