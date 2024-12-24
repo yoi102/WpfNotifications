@@ -105,34 +105,7 @@
             </DataTemplate>
         </ControlTemplate.Resources>
         <ContentPresenter />
-    </ControlTemplate>
-
-    <Style TargetType="{x:Type controls:Notification}"
-           x:Key="NotificationBase">
-        <Setter Property="UseLayoutRounding"
-                Value="True" />
-        <Setter Property="SnapsToDevicePixels"
-                Value="True" />
-        <Setter Property="Margin"
-                Value="8 0 8 8" />
-        <Setter Property="ContentTemplateSelector"
-                Value="{StaticResource NotificationTemplateSelector}" />
-        <Setter Property="Template"
-                Value="{StaticResource NotificationTemplate}" />
-        <Setter Property="LayoutTransform">
-            <Setter.Value>
-                <ScaleTransform />
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Effect">
-            <Setter.Value>
-                <DropShadowEffect BlurRadius="5"
-                                  Direction="0"
-                                  ShadowDepth="0"
-                                  Opacity=".25" />
-            </Setter.Value>
-        </Setter>
-        <Style.Triggers>
+        <ControlTemplate.Triggers>
             <EventTrigger RoutedEvent="Loaded">
                 <BeginStoryboard>
                     <Storyboard>
@@ -169,8 +142,34 @@
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
-        </Style.Triggers>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
 
+    <Style TargetType="{x:Type controls:Notification}"
+           x:Key="NotificationBase">
+        <Setter Property="UseLayoutRounding"
+                Value="True" />
+        <Setter Property="SnapsToDevicePixels"
+                Value="True" />
+        <Setter Property="Margin"
+                Value="8 0 8 8" />
+        <Setter Property="ContentTemplateSelector"
+                Value="{StaticResource NotificationTemplateSelector}" />
+        <Setter Property="Template"
+                Value="{StaticResource NotificationTemplate}" />
+        <Setter Property="LayoutTransform">
+            <Setter.Value>
+                <ScaleTransform />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="5"
+                                  Direction="0"
+                                  ShadowDepth="0"
+                                  Opacity=".25" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="{x:Type controls:Notification}"
@@ -183,7 +182,5 @@
                 Value="#444444" />
         <Setter Property="Foreground"
                 Value="White" />
-
     </Style>
-
 </ResourceDictionary>
