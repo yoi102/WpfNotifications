@@ -27,6 +27,10 @@ namespace Notifications.Sample
             notificationManager = new NotificationManager();
             NotificationConstants.NotificationsOverlayWindowNotificationPosition = Enums.NotificationPosition.TopRight;
             NotificationConstants.NotificationsOverlayWindowMaxCount = 7;
+            NotificationConstants.NotificationForeground = new SolidColorBrush(Colors.Cornsilk);
+            NotificationConstants.NotificationFontSize = 18;
+            NotificationConstants.NotificationWidth = 300;
+            NotificationConstants.NotificationFontWeight = FontWeights.Bold;
         }
 
         private static object RandomCustomMessage()

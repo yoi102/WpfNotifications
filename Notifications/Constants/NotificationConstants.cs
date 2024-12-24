@@ -1,5 +1,6 @@
 ﻿using Notifications.Enums;
 using System.Windows;
+using System.Windows.Media;
 
 namespace Notifications.Constants
 {
@@ -18,6 +19,11 @@ namespace Notifications.Constants
 
         /// <summary> Overlay message position </summary>
         public static NotificationPosition NotificationsOverlayWindowNotificationPosition { get; set; } = NotificationPosition.BottomRight;
+        public static double NotificationWidth { get; set; } = 350;
+        public static double NotificationFontSize { get; set; } = 15;
+        public static FontWeight NotificationFontWeight { get; set; } = FontWeights.Normal;
+        public static Brush NotificationBackground { get; set; } = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#444444"));
+        public static Brush NotificationForeground { get; set; } = new SolidColorBrush(Colors.White);
    
         
     }

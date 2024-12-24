@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:Notifications.Controls"
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:constants="clr-namespace:Notifications.Constants"
                     xmlns:noti="clr-namespace:Notifications">
 
     <Path x:Key="ErrorIcon"
@@ -81,7 +82,7 @@
                                 Value="{StaticResource SuccessIcon}" />
                         <Setter TargetName="Border"
                                 Property="Background"
-                                Value="LimeGreen" />
+                                Value="MediumSeaGreen" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Type}"
                                  Value="Warning">
@@ -174,13 +175,15 @@
 
     <Style TargetType="{x:Type controls:Notification}"
            BasedOn="{StaticResource NotificationBase}">
+        <Setter Property="FontWeight"
+                Value="{x:Static constants:NotificationConstants.NotificationFontWeight}" />
         <Setter Property="Width"
-                Value="350" />
+                Value="{x:Static constants:NotificationConstants.NotificationWidth}" />
         <Setter Property="FontSize"
-                Value="14"></Setter>
+                Value="{x:Static constants:NotificationConstants.NotificationFontSize}" />
         <Setter Property="Background"
-                Value="#444444" />
+                Value="{x:Static constants:NotificationConstants.NotificationBackground}" />
         <Setter Property="Foreground"
-                Value="White" />
+                Value="{x:Static constants:NotificationConstants.NotificationForeground}" />
     </Style>
 </ResourceDictionary>
