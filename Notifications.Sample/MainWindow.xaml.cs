@@ -1,4 +1,5 @@
-﻿using Notifications.Sample.Messages;
+﻿using Notifications.Constants;
+using Notifications.Sample.Messages;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,6 +25,7 @@ namespace Notifications.Sample
             InitializeComponent();
 
             notificationManager = new NotificationManager();
+            NotificationConstants.NotificationsOverlayWindowNotificationPosition = Enums.NotificationPosition.TopRight;
         }
 
         private static object RandomCustomMessage()
