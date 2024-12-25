@@ -62,7 +62,7 @@ namespace Notifications.Sample
                     break;
 
                 default:
-                    throw new ApplicationException();
+                    throw new NotSupportedException();
             }
 
             return message;

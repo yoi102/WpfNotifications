@@ -1,5 +1,4 @@
 ﻿using Notifications.Controls;
-using Notifications.Enums;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -27,7 +26,7 @@ namespace Notifications
         {
             if (content == null)
             {
-                throw new Exception();
+                throw new ArgumentNullException(nameof(content));
             }
 
             if (!_dispatcher.CheckAccess())
