@@ -79,7 +79,7 @@ namespace Notifications.Controls
             RaiseEvent(new RoutedEventArgs(NotificationClosingEvent));
             await Task.Delay(10);
 
-            AnimateWidthToZero(expirationTime);
+            ShrinkColorBarOverTime(expirationTime);
 
             if (expirationTime == TimeSpan.MaxValue)
             {
@@ -90,7 +90,7 @@ namespace Notifications.Controls
             await CloseAsync();
         }
 
-        private void AnimateWidthToZero(TimeSpan expirationTime)
+        private void ShrinkColorBarOverTime(TimeSpan expirationTime)
         {
             if (Content is not string && Content is not NotificationContent)
             {
