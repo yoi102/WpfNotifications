@@ -105,7 +105,20 @@
                 </DataTemplate.Triggers>
             </DataTemplate>
         </ControlTemplate.Resources>
-        <ContentPresenter />
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition  Height="auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Rectangle x:Name="PART_ColorBar"
+                       HorizontalAlignment="Left"
+                       Fill="White"
+                       Height="5"
+                       Width="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth}" />
+            <ContentPresenter Grid.Row="1" />
+        </Grid>
+
         <ControlTemplate.Triggers>
             <EventTrigger RoutedEvent="Loaded">
                 <BeginStoryboard>
