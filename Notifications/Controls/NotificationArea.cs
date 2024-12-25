@@ -14,21 +14,13 @@ namespace Notifications.Controls
         public static readonly DependencyProperty MaxItemsProperty =
             DependencyProperty.Register("MaxItems", typeof(uint), typeof(NotificationArea), new PropertyMetadata(uint.MaxValue));
 
-        // Using a DependencyProperty as the backing store for Position.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty PositionProperty =
-            DependencyProperty.Register("Position", typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
-
-
-        public Thickness NotificationMargin
-        {
-            get { return (Thickness)GetValue(NotificationMarginProperty); }
-            set { SetValue(NotificationMarginProperty, value); }
-        }
-
         // Using a DependencyProperty as the backing store for NotificationMargin.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty NotificationMarginProperty =
             DependencyProperty.Register("NotificationMargin", typeof(Thickness), typeof(NotificationArea), new PropertyMetadata(new Thickness(8, 8, 8, 0)));
 
+        // Using a DependencyProperty as the backing store for Position.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty PositionProperty =
+            DependencyProperty.Register("Position", typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
 
         private IList _items = null!;
 
@@ -55,6 +47,11 @@ namespace Notifications.Controls
             set { SetValue(MaxItemsProperty, value); }
         }
 
+        public Thickness NotificationMargin
+        {
+            get { return (Thickness)GetValue(NotificationMarginProperty); }
+            set { SetValue(NotificationMarginProperty, value); }
+        }
         public NotificationPosition Position
         {
             get { return (NotificationPosition)GetValue(PositionProperty); }
@@ -112,12 +109,12 @@ namespace Notifications.Controls
 
             lock (_items)
             {
-                _items.Add(new ContentControl() { Content = notification, Margin = this.NotificationMargin });
+                _items.Add(new NotificationContainer(notification) { Margin = this.NotificationMargin });
 
-                if (_items.OfType<Notification>().Count(i => !i.IsClosing) > MaxItems)
+                if (_items.OfType<NotificationContainer>().Count(i => !i.IsClosing) > MaxItems)
                 {
-                    _items.OfType<Notification>().First(i => !i.IsClosing).CloseAsync().GetAwaiter();
-                }
+                    _items.OfType<NotificationContainer>().First(i => !i.IsClosing).Notification.CloseAsync().GetAwaiter();
+                };
             }
 
             await notification.ScheduleCloseAsync(expirationTime);
