@@ -18,26 +18,9 @@ namespace Notifications
             _dispatcher = dispatcher;
         }
 
-        public async Task ShowAsync(string title,
-                            string message,
-                            NotificationType notificationType,
-                            string areaIdentifier = "",
-                            TimeSpan? expirationTime = null,
-                            Action? onClick = null,
-                            Action? onClose = null)
-        {
-            NotificationContent notificationContent = new()
-            {
-                Title = title,
-                Message = message,
-                Type = notificationType
-            };
-
-            await ShowAsync(notificationContent, areaIdentifier, expirationTime, onClick, onClose);
-        }
-
         public async Task ShowAsync(object content,
                                     string areaIdentifier = "",
+                                    bool closeOnClick = true,
                                     TimeSpan? expirationTime = null,
                                     Action? onClick = null,
                                     Action? onClose = null)
@@ -50,7 +33,7 @@ namespace Notifications
             if (!_dispatcher.CheckAccess())
             {
                 _dispatcher.BeginInvoke(
-                    () => ShowAsync(content, areaIdentifier, expirationTime, onClick, onClose)).GetAwaiter();
+                    () => ShowAsync(content, areaIdentifier, closeOnClick, expirationTime, onClick, onClose)).GetAwaiter();
                 return;
             }
 
@@ -80,7 +63,7 @@ namespace Notifications
 
             foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier).ToArray())
             {
-                await area.ShowAsync(content, (TimeSpan)expirationTime, onClick, onClose);
+                await area.ShowAsync(content, closeOnClick, (TimeSpan)expirationTime, onClick, onClose);
             }
         }
 

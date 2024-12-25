@@ -5,7 +5,7 @@ using System.Windows.Media.Animation;
 
 namespace Notifications.Controls
 {
-    public class Notification : ContentControl, INotifyPropertyChanged
+    public class Notification : ContentControl
     {
         // Using a DependencyProperty as the backing store for ExpirationTime.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ExpirationTimeProperty =
@@ -21,8 +21,6 @@ namespace Notifications.Controls
            "NotificationClosing", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
 
         private TimeSpan _closingAnimationTime = TimeSpan.Zero;
-
-        private Duration expirationTime;
 
         public event RoutedEventHandler NotificationClosed
         {
@@ -42,8 +40,6 @@ namespace Notifications.Controls
             remove { RemoveHandler(NotificationClosingEvent, value); }
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public Duration ExpirationTime
         {
             get { return (Duration)GetValue(ExpirationTimeProperty); }
@@ -52,7 +48,7 @@ namespace Notifications.Controls
 
         public bool IsClosing { get; set; }
 
-        public virtual async Task CloseAsync(TimeSpan expirationTime)
+        public virtual async Task ScheduleCloseAsync(TimeSpan expirationTime)
         {
             ExpirationTime = expirationTime;
             RaiseEvent(new RoutedEventArgs(NotificationClosingEvent));
@@ -63,7 +59,7 @@ namespace Notifications.Controls
             }
             await Task.Delay(expirationTime);
 
-            await InternalCloseAsync();
+            await CloseAsync();
         }
 
         public override void OnApplyTemplate()
@@ -73,7 +69,7 @@ namespace Notifications.Controls
             _closingAnimationTime = new TimeSpan(storyboards?.Max(s => Math.Min((s.Duration.HasTimeSpan ? s.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero) : TimeSpan.MaxValue).Ticks, s.Children.Select(ch => ch.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero)).Max().Ticks)) ?? 0);
         }
 
-        internal async Task InternalCloseAsync()
+        public async Task CloseAsync()
         {
             if (IsClosing)
             {

@@ -20,5 +20,5 @@
 
     <controls:NotificationArea  Position="{x:Static constants:NotificationConstants.NotificationsOverlayWindowNotificationPosition}"
                                 MaxItems="{x:Static constants:NotificationConstants.NotificationsOverlayWindowMaxCount}"
-                                Margin="{x:Static constants:NotificationConstants.NotificationsOverlayWindowNotificationMargin}" />
+                                NotificationMargin="{x:Static  constants:NotificationConstants.NotificationsOverlayWindowNotificationMargin}" />
 </Window>

@@ -18,6 +18,18 @@ namespace Notifications.Controls
         public static readonly DependencyProperty PositionProperty =
             DependencyProperty.Register("Position", typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
 
+
+        public Thickness NotificationMargin
+        {
+            get { return (Thickness)GetValue(NotificationMarginProperty); }
+            set { SetValue(NotificationMarginProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for NotificationMargin.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty NotificationMarginProperty =
+            DependencyProperty.Register("NotificationMargin", typeof(Thickness), typeof(NotificationArea), new PropertyMetadata(new Thickness(8, 8, 8, 0)));
+
+
         private IList _items = null!;
 
         static NotificationArea()
@@ -59,7 +71,7 @@ namespace Notifications.Controls
             _items = itemsControl.Children;
         }
 
-        public async Task ShowAsync(object content, TimeSpan expirationTime, Action? onClick, Action? onClose)
+        public async Task ShowAsync(object content, bool closeOnClick, TimeSpan expirationTime, Action? onClick, Action? onClose)
         {
             if (content is not Notification notification)
             {
@@ -74,12 +86,15 @@ namespace Notifications.Controls
 
                 notification.Style = style;
             }
-
-            notification.MouseLeftButtonDown += (sender, args) =>
+            if (closeOnClick)
             {
-                onClick?.Invoke();
-                (sender as Notification)?.InternalCloseAsync();
-            };
+                notification.MouseLeftButtonDown += (sender, args) =>
+                {
+                    onClick?.Invoke();
+                    (sender as Notification)?.CloseAsync();
+                };
+            }
+
             notification.NotificationClosed += (sender, args) => onClose?.Invoke();
             notification.NotificationClosed += OnNotificationClosed;
 
@@ -97,21 +112,21 @@ namespace Notifications.Controls
 
             lock (_items)
             {
-                _items.Add(notification);
+                _items.Add(new ContentControl() { Content = notification, Margin = this.NotificationMargin });
 
                 if (_items.OfType<Notification>().Count(i => !i.IsClosing) > MaxItems)
                 {
-                    _items.OfType<Notification>().First(i => !i.IsClosing).InternalCloseAsync().GetAwaiter();
+                    _items.OfType<Notification>().First(i => !i.IsClosing).CloseAsync().GetAwaiter();
                 }
             }
 
-            await notification.CloseAsync(expirationTime);
+            await notification.ScheduleCloseAsync(expirationTime);
         }
 
         private void OnNotificationClosed(object sender, RoutedEventArgs routedEventArgs)
         {
             var notification = sender as Notification;
-            _items.Remove(notification);
+            _items.Remove(notification?.Parent);
         }
     }
 }

@@ -152,8 +152,6 @@
                 Value="True" />
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
-        <Setter Property="Margin"
-                Value="8 0 8 8" />
         <Setter Property="ContentTemplateSelector"
                 Value="{StaticResource NotificationTemplateSelector}" />
         <Setter Property="Template"
@@ -176,14 +174,14 @@
     <Style TargetType="{x:Type controls:Notification}"
            BasedOn="{StaticResource NotificationBase}">
         <Setter Property="FontWeight"
-                Value="{x:Static constants:NotificationConstants.NotificationFontWeight}" />
+                Value="{x:Static constants:NotificationConstants.DefaultNotificationFontWeight}" />
         <Setter Property="Width"
                 Value="{x:Static constants:NotificationConstants.NotificationWidth}" />
         <Setter Property="FontSize"
-                Value="{x:Static constants:NotificationConstants.NotificationFontSize}" />
+                Value="{x:Static constants:NotificationConstants.DefaultNotificationFontSize}" />
         <Setter Property="Background"
-                Value="{x:Static constants:NotificationConstants.NotificationBackground}" />
+                Value="{x:Static constants:NotificationConstants.StringNotificationBackground}" />
         <Setter Property="Foreground"
-                Value="{x:Static constants:NotificationConstants.NotificationForeground}" />
+                Value="{x:Static constants:NotificationConstants.DefaultNotificationForeground}" />
     </Style>
 </ResourceDictionary>

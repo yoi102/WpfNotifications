@@ -9,7 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\img.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Notifications\Notifications.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\img.jpg" />
   </ItemGroup>
 
 </Project>

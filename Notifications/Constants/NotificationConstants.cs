@@ -6,24 +6,19 @@ namespace Notifications.Constants
 {
     public class NotificationConstants
     {
-        /// <summary> work area height </summary>
-        public static double AreaHeight => SystemParameters.WorkArea.Height;
 
-        /// <summary> work area width </summary>
-        public static double AreaWidth => SystemParameters.WorkArea.Width;
+        public static Brush StringNotificationBackground { get; set; } = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#444444"));
 
-        public static Brush NotificationBackground { get; set; } = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#444444"));
+        public static double DefaultNotificationFontSize { get; set; } = 15;
 
-        public static double NotificationFontSize { get; set; } = 15;
+        public static FontWeight DefaultNotificationFontWeight { get; set; } = FontWeights.Normal;
 
-        public static FontWeight NotificationFontWeight { get; set; } = FontWeights.Normal;
-
-        public static Brush NotificationForeground { get; set; } = new SolidColorBrush(Colors.White);
+        public static Brush DefaultNotificationForeground { get; set; } = new SolidColorBrush(Colors.White);
 
         /// <summary> Overlay window maximum count </summary>
         public static uint NotificationsOverlayWindowMaxCount { get; set; } = uint.MaxValue;
 
-        public static Thickness NotificationsOverlayWindowNotificationMargin { get; set; } = new Thickness(0, 12, 0, 0);
+        public static Thickness NotificationsOverlayWindowNotificationMargin { get; set; } = new Thickness(8, 8, 8, 0);
 
         /// <summary> Overlay message position </summary>
         public static NotificationPosition NotificationsOverlayWindowNotificationPosition { get; set; } = NotificationPosition.BottomRight;

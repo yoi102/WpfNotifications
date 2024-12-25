@@ -2,5 +2,5 @@
 using System.Windows.Markup;
 
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]
-[assembly: XmlnsPrefix(@"https://github.com/yoi102/xaml/controls", "yr")]
-[assembly: XmlnsDefinition(@"https://github.com/yoi102/xaml/controls", "Notifications.Controls")]
+[assembly: XmlnsPrefix(@"https://github.com/notifications/xaml/controls", "ntf")]
+[assembly: XmlnsDefinition(@"https://github.com/notifications/xaml/controls", "Notifications.Controls")]

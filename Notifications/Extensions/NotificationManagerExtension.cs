@@ -4,11 +4,12 @@ namespace Notifications.Extensions
 {
     public static class NotificationManagerExtension
     {
-        public static async Task ShowAsync(this NotificationManager notificationManager,
+        public static async Task ShowAsync(this INotificationManager notificationManager,
                                     string title,
                                     string message,
                                     NotificationType notificationType,
                                     string areaIdentifier = "",
+                                    bool closeOnClick = true,
                                     TimeSpan? expirationTime = null,
                                     Action? onClick = null,
                                     Action? onClose = null)
@@ -20,17 +21,7 @@ namespace Notifications.Extensions
                 Type = notificationType
             };
 
-            await notificationManager.ShowAsync(notificationContent, areaIdentifier, expirationTime, onClick, onClose);
-        }
-
-        public static async Task ShowAsync(this NotificationManager notificationManager,
-                            string message,
-                            string areaIdentifier = "",
-                            TimeSpan? expirationTime = null,
-                            Action? onClick = null,
-                            Action? onClose = null)
-        {
-            await notificationManager.ShowAsync(message, areaIdentifier, expirationTime, onClick, onClose);
+            await notificationManager.ShowAsync(notificationContent, areaIdentifier, closeOnClick, expirationTime, onClick, onClose);
         }
     }
 }
