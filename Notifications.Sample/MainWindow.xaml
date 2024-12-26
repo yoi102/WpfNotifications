@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ntf="https://github.com/notifications/xaml/controls"
         xmlns:enum="clr-namespace:Notifications.Enums;assembly=Notifications"
-        Background="#444444"
+        Background="Gray"
         mc:Ignorable="d"
         Title="MainWindow"
         Height="800"
@@ -30,6 +30,9 @@
                         <ComboBoxItem  Content="BottomLeft" />
                         <ComboBoxItem  Content="BottomRight" />
                     </ComboBox>
+                    <CheckBox x:Name="AllowRemovingPermanentOnOverflow"
+                              Margin="20 10 0 0"
+                              Content="AllowRemovingPermanentOnOverflow" />
                 </StackPanel>
             </GroupBox>
 
@@ -56,7 +59,7 @@
                               Identifier="main_window"
                               NotificationMargin="10 10 10 0"
                               MaxItems="3"
-                              AllowRemovingPermanentOnOverflow="True"
+                              AllowRemovingPermanentOnOverflow="{Binding ElementName=AllowRemovingPermanentOnOverflow,Path=IsChecked}"
                               Panel.ZIndex="9999" />
     </Grid>
 </Window>
