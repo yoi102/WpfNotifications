@@ -4,7 +4,7 @@ namespace Notifications.Extensions
 {
     public static class NotificationManagerExtension
     {
-        public static async Task ShowAsync(this INotificationManager notificationManager,
+        public static void Show(this INotificationManager notificationManager,
                                     string title,
                                     string message,
                                     NotificationType notificationType,
@@ -21,7 +21,7 @@ namespace Notifications.Extensions
                 Type = notificationType
             };
 
-            await notificationManager.ShowAsync(notificationContent, areaIdentifier, closeOnClick, expirationTime, onClick, onClose);
+            notificationManager.Show(notificationContent, areaIdentifier, closeOnClick, expirationTime, onClick, onClose);
         }
     }
 }

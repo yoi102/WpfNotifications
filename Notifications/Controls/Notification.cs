@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
@@ -12,8 +13,12 @@ namespace Notifications.Controls
         public static readonly DependencyProperty ExpirationTimeProperty =
             DependencyProperty.Register("ExpirationTime", typeof(Duration), typeof(Notification), new PropertyMetadata(new Duration(TimeSpan.FromSeconds(1))));
 
+        // Using a DependencyProperty as the backing store for IsPermanent.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty IsPermanentProperty =
+            DependencyProperty.Register("IsPermanent", typeof(bool), typeof(Notification), new PropertyMetadata(false));
+
         public static readonly RoutedEvent NotificationClosedEvent = EventManager.RegisterRoutedEvent(
-                    "NotificationClosed", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
+                            "NotificationClosed", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
 
         public static readonly RoutedEvent NotificationCloseInvokedEvent = EventManager.RegisterRoutedEvent(
             "NotificationCloseInvoked", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Notification));
@@ -51,7 +56,12 @@ namespace Notifications.Controls
 
         public bool IsClosing { get; set; }
 
-        public async Task CloseAsync()
+        public bool IsPermanent
+        {
+            get { return (bool)GetValue(IsPermanentProperty); }
+            set { SetValue(IsPermanentProperty, value); }
+        }
+        public async void Close()
         {
             if (IsClosing)
             {
@@ -73,34 +83,38 @@ namespace Notifications.Controls
             _closingAnimationTime = new TimeSpan(closingStoryboards?.Max(s => Math.Min((s.Duration.HasTimeSpan ? s.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero) : TimeSpan.MaxValue).Ticks, s.Children.Select(ch => ch.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero)).Max().Ticks)) ?? 0);
         }
 
-        public virtual async Task ScheduleCloseAsync(TimeSpan expirationTime)
+        public virtual async void ScheduleClose(TimeSpan expirationTime)
         {
             ExpirationTime = expirationTime;
             RaiseEvent(new RoutedEventArgs(NotificationClosingEvent));
-            await Task.Delay(10);
-
-            ShrinkColorBarOverTime(expirationTime);
 
             if (expirationTime == TimeSpan.MaxValue)
             {
+                IsPermanent = true;
                 return;
+            }
+
+            if (Content is string || Content is NotificationContent)
+            {
+                await ShrinkColorBarOverTimeAsync(expirationTime);
             }
             await Task.Delay(expirationTime);
 
-            await CloseAsync();
+            Close();
         }
 
-        private void ShrinkColorBarOverTime(TimeSpan expirationTime)
+        private async Task ShrinkColorBarOverTimeAsync(TimeSpan expirationTime)
         {
-            if (Content is not string && Content is not NotificationContent)
+            for (int i = 0; i < 100; i++)
             {
-                _colorBar.Visibility = Visibility.Collapsed;
-                return;
+                if (_colorBar is not null)
+                    break;
+                await Task.Delay(10);
             }
 
             if (_colorBar is null)
                 return;
-
+            _colorBar.Height = 5;
             DoubleAnimation widthAnimation = new DoubleAnimation
             {
                 From = _colorBar.RenderSize.Width,

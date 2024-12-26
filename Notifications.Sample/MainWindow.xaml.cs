@@ -1,7 +1,9 @@
 ﻿using Notifications.Constants;
+using Notifications.Enums;
 using Notifications.Extensions;
 using Notifications.Sample.Messages;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Notifications.Sample
@@ -18,12 +20,13 @@ namespace Notifications.Sample
             InitializeComponent();
 
             notificationManager = new NotificationManager();
-            NotificationConstants.NotificationsOverlayWindowNotificationPosition = Enums.NotificationPosition.TopRight;
-            NotificationConstants.NotificationsOverlayWindowMaxCount = 7;
+            NotificationConstants.OverlayWindowNotificationPosition = Enums.NotificationPosition.TopRight;
+            NotificationConstants.OverlayWindowMaxCount = 7;
             NotificationConstants.DefaultNotificationForeground = new SolidColorBrush(Colors.MistyRose);
             NotificationConstants.DefaultNotificationFontSize = 18;
             NotificationConstants.NotificationWidth = 300;
             NotificationConstants.DefaultNotificationFontWeight = FontWeights.Bold;
+            NotificationConstants.OverlayWindowAllowRemovingPermanentOnOverflow = false;
         }
 
         public string NotificationArea
@@ -68,36 +71,51 @@ namespace Notifications.Sample
             return message;
         }
 
-        private async void CustomButtonClick(object sender, RoutedEventArgs e)
+        private void ClearButtonClick(object sender, RoutedEventArgs e)
+        {
+            notificationManager.Clear(NotificationArea);
+        }
+
+        private void comb_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            var comboBox = (ComboBox)sender;
+            if (notificationArea == null)
+            {
+                return;
+            }
+            notificationArea.Position = (NotificationPosition)comboBox.SelectedIndex;
+        }
+
+        private void CustomButtonClick(object sender, RoutedEventArgs e)
         {
             var message = RandomCustomMessage();
-            await notificationManager.ShowAsync(message, NotificationArea);
+            notificationManager.Show(message, NotificationArea);
         }
 
-        private async void MessageButtonClick(object sender, RoutedEventArgs e)
-        {
-            await notificationManager.ShowAsync("title", NotificationArea);
-        }
-
-        private async void MessageWithTitleButtonClick(object sender, RoutedEventArgs e)
-        {
-            Random random = new Random();
-            var type = (Enums.NotificationType)random.Next(0, 4);
-            await notificationManager.ShowAsync("title", "message", type, NotificationArea);
-        }
-
-        private async void UserControlMessageButtonClick(object sender, RoutedEventArgs e)
-        {
-            UserControlMessage userControlMessage = new UserControlMessage();
-
-            await notificationManager.ShowAsync(userControlMessage, NotificationArea);
-        }
-
-        private async void CustomNotificationButtonClick(object sender, RoutedEventArgs e)
+        private void CustomNotificationButtonClick(object sender, RoutedEventArgs e)
         {
             CustomNotification userControlMessage = new CustomNotification();
 
-            await notificationManager.ShowAsync(userControlMessage, NotificationArea, false, TimeSpan.MaxValue);
+            notificationManager.Show(userControlMessage, NotificationArea, false, TimeSpan.MaxValue);
+        }
+
+        private void MessageButtonClick(object sender, RoutedEventArgs e)
+        {
+            notificationManager.Show("title", NotificationArea);
+        }
+
+        private void MessageWithTitleButtonClick(object sender, RoutedEventArgs e)
+        {
+            Random random = new Random();
+            var type = (Enums.NotificationType)random.Next(0, 4);
+            notificationManager.Show("title", "message", type, NotificationArea);
+        }
+
+        private void UserControlMessageButtonClick(object sender, RoutedEventArgs e)
+        {
+            UserControlMessage userControlMessage = new UserControlMessage();
+
+            notificationManager.Show(userControlMessage, NotificationArea);
         }
     }
 }

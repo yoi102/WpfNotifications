@@ -114,7 +114,7 @@
             <Rectangle x:Name="PART_ColorBar"
                        HorizontalAlignment="Left"
                        Fill="White"
-                       Height="5"
+                       Height="0"
                        Width="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth}" />
             <ContentPresenter Grid.Row="1" />
         </Grid>

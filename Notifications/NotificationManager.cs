@@ -17,12 +17,27 @@ namespace Notifications
             _dispatcher = dispatcher;
         }
 
-        public async Task ShowAsync(object content,
-                                    string areaIdentifier = "",
-                                    bool closeOnClick = true,
-                                    TimeSpan? expirationTime = null,
-                                    Action? onClick = null,
-                                    Action? onClose = null)
+        public void Clear(string areaIdentifier = "")
+        {
+            if (areaIdentifier == string.Empty && _window != null)
+            {
+                _window.Clear();
+            }
+            else
+            {
+                foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier))
+                {
+                    area.Clear();
+                }
+            }
+        }
+
+        public void Show(object content,
+                               string areaIdentifier = "",
+                               bool closeOnClick = true,
+                               TimeSpan? expirationTime = null,
+                               Action? onClick = null,
+                               Action? onClose = null)
         {
             if (content == null)
             {
@@ -32,7 +47,7 @@ namespace Notifications
             if (!_dispatcher.CheckAccess())
             {
                 _dispatcher.BeginInvoke(
-                    () => ShowAsync(content, areaIdentifier, closeOnClick, expirationTime, onClick, onClose)).GetAwaiter();
+                    () => Show(content, areaIdentifier, closeOnClick, expirationTime, onClick, onClose)).GetAwaiter();
                 return;
             }
 
@@ -62,7 +77,7 @@ namespace Notifications
 
             foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier).ToArray())
             {
-                await area.ShowAsync(content, closeOnClick, (TimeSpan)expirationTime, onClick, onClose);
+                area.Show(content, closeOnClick, (TimeSpan)expirationTime, onClick, onClose);
             }
         }
 

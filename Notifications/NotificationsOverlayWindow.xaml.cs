@@ -13,6 +13,10 @@ namespace Notifications
         {
             InitializeComponent();
         }
+        public void Clear()
+        {
+            area.Clear();
+        }
 
         private void NotificationsOverlayWindow_Loaded(object sender, RoutedEventArgs e)
         {

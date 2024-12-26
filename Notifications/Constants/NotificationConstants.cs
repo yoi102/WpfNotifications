@@ -16,12 +16,13 @@ namespace Notifications.Constants
         public static Brush DefaultNotificationForeground { get; set; } = new SolidColorBrush(Colors.White);
 
         /// <summary> Overlay window maximum count </summary>
-        public static uint NotificationsOverlayWindowMaxCount { get; set; } = uint.MaxValue;
+        public static bool OverlayWindowAllowRemovingPermanentOnOverflow { get; set; } = false;
+        public static uint OverlayWindowMaxCount { get; set; } = uint.MaxValue;
 
-        public static Thickness NotificationsOverlayWindowNotificationMargin { get; set; } = new Thickness(8, 8, 8, 0);
+        public static Thickness OverlayWindowNotificationMargin { get; set; } = new Thickness(8, 8, 8, 0);
 
         /// <summary> Overlay message position </summary>
-        public static NotificationPosition NotificationsOverlayWindowNotificationPosition { get; set; } = NotificationPosition.BottomRight;
+        public static NotificationPosition OverlayWindowNotificationPosition { get; set; } = NotificationPosition.BottomRight;
 
         public static double NotificationWidth { get; set; } = 350;
     }

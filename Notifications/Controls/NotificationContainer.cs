@@ -11,7 +11,7 @@ namespace Notifications.Controls
             Content = notification;
             this.notification = notification;
         }
-
+        public bool IsPermanent => notification.IsPermanent;
         public bool IsClosing => notification.IsClosing;
         public Notification Notification => notification;
     }

@@ -4,6 +4,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ntf="https://github.com/notifications/xaml/controls"
+        xmlns:enum="clr-namespace:Notifications.Enums;assembly=Notifications"
+        Background="#444444"
         mc:Ignorable="d"
         Title="MainWindow"
         Height="800"
@@ -12,9 +14,23 @@
 
         <UniformGrid>
             <GroupBox Header="Option">
-                <CheckBox x:Name="isInWindow"
-                          Margin="20 20 0 0"
-                          Content="InWindow" />
+                <StackPanel>
+
+                    <CheckBox x:Name="isInWindow"
+                              Margin="20 20 0 0"
+                              Content="InWindow" />
+                    <ComboBox Margin="20 10 0 0"
+                              SelectedIndex="3"
+                              Name="comb"
+                              HorizontalAlignment="Left"
+                              SelectionChanged="comb_SelectionChanged"
+                              Width="200">
+                        <ComboBoxItem  Content="TopLeft" />
+                        <ComboBoxItem  Content="TopRight" />
+                        <ComboBoxItem  Content="BottomLeft" />
+                        <ComboBoxItem  Content="BottomRight" />
+                    </ComboBox>
+                </StackPanel>
             </GroupBox>
 
             <Button Margin="20"
@@ -32,12 +48,15 @@
             <Button Margin="20"
                     Content="CustomNotification"
                     Click="CustomNotificationButtonClick" />
+            <Button Margin="20"
+                    Content="Clear"
+                    Click="ClearButtonClick" />
         </UniformGrid>
         <ntf:NotificationArea x:Name="notificationArea"
                               Identifier="main_window"
                               NotificationMargin="10 10 10 0"
                               MaxItems="3"
-                              Position="BottomRight"
+                              AllowRemovingPermanentOnOverflow="True"
                               Panel.ZIndex="9999" />
     </Grid>
 </Window>

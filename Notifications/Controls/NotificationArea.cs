@@ -7,6 +7,10 @@ namespace Notifications.Controls
 {
     public class NotificationArea : Control
     {
+        // Using a DependencyProperty as the backing store for AllowRemovingPermanentOnOverflow.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty AllowRemovingPermanentOnOverflowProperty =
+            DependencyProperty.Register("AllowRemovingPermanentOnOverflow", typeof(bool), typeof(NotificationArea), new PropertyMetadata(false));
+
         // Using a DependencyProperty as the backing store for Identifier.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IdentifierProperty =
             DependencyProperty.Register("Identifier", typeof(string), typeof(NotificationArea), new PropertyMetadata(""));
@@ -35,6 +39,12 @@ namespace Notifications.Controls
             NotificationManager.AddArea(this);
         }
 
+        public bool AllowRemovingPermanentOnOverflow
+        {
+            get { return (bool)GetValue(AllowRemovingPermanentOnOverflowProperty); }
+            set { SetValue(AllowRemovingPermanentOnOverflowProperty, value); }
+        }
+
         public string Identifier
         {
             get { return (string)GetValue(IdentifierProperty); }
@@ -52,10 +62,19 @@ namespace Notifications.Controls
             get { return (Thickness)GetValue(NotificationMarginProperty); }
             set { SetValue(NotificationMarginProperty, value); }
         }
+
         public NotificationPosition Position
         {
             get { return (NotificationPosition)GetValue(PositionProperty); }
             set { SetValue(PositionProperty, value); }
+        }
+
+        public void Clear()
+        {
+            foreach (var item in _items.OfType<NotificationContainer>().ToArray())
+            {
+                item.Notification.Close();
+            }
         }
 
         public override void OnApplyTemplate()
@@ -68,7 +87,7 @@ namespace Notifications.Controls
             _items = itemsControl.Children;
         }
 
-        public async Task ShowAsync(object content, bool closeOnClick, TimeSpan expirationTime, Action? onClick, Action? onClose)
+        public void Show(object content, bool closeOnClick, TimeSpan expirationTime, Action? onClick, Action? onClose)
         {
             if (content is not Notification notification)
             {
@@ -88,7 +107,7 @@ namespace Notifications.Controls
                 notification.MouseLeftButtonDown += (sender, args) =>
                 {
                     onClick?.Invoke();
-                    (sender as Notification)?.CloseAsync();
+                    (sender as Notification)?.Close();
                 };
             }
 
@@ -111,13 +130,25 @@ namespace Notifications.Controls
             {
                 _items.Add(new NotificationContainer(notification) { Margin = this.NotificationMargin });
 
-                if (_items.OfType<NotificationContainer>().Count(i => !i.IsClosing) > MaxItems)
+                if (AllowRemovingPermanentOnOverflow)
                 {
-                    _items.OfType<NotificationContainer>().First(i => !i.IsClosing).Notification.CloseAsync().GetAwaiter();
-                };
+                    if (_items.OfType<NotificationContainer>().Count(i => !i.IsClosing) > MaxItems)
+                    {
+                        _items.OfType<NotificationContainer>().First(i => !i.IsClosing).Notification.Close();
+                    };
+                }
+                else
+                {
+                    var removableNotifications = _items.OfType<NotificationContainer>().Where(n => !n.IsPermanent && !n.IsClosing);
+
+                    if (removableNotifications.Count() > MaxItems)
+                    {
+                        removableNotifications.First().Notification.Close();
+                    };
+                }
             }
 
-            await notification.ScheduleCloseAsync(expirationTime);
+            notification.ScheduleClose(expirationTime);
         }
 
         private void OnNotificationClosed(object sender, RoutedEventArgs routedEventArgs)

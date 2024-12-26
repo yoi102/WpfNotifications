@@ -18,7 +18,9 @@
         d:DesignHeight="600"
         Loaded="NotificationsOverlayWindow_Loaded">
 
-    <controls:NotificationArea  Position="{x:Static constants:NotificationConstants.NotificationsOverlayWindowNotificationPosition}"
-                                MaxItems="{x:Static constants:NotificationConstants.NotificationsOverlayWindowMaxCount}"
-                                NotificationMargin="{x:Static  constants:NotificationConstants.NotificationsOverlayWindowNotificationMargin}" />
+    <controls:NotificationArea x:Name="area"
+                               AllowRemovingPermanentOnOverflow="{x:Static constants:NotificationConstants.OverlayWindowAllowRemovingPermanentOnOverflow}"
+                               Position="{x:Static constants:NotificationConstants.OverlayWindowNotificationPosition}"
+                               MaxItems="{x:Static constants:NotificationConstants.OverlayWindowMaxCount}"
+                               NotificationMargin="{x:Static  constants:NotificationConstants.OverlayWindowNotificationMargin}" />
 </Window>
