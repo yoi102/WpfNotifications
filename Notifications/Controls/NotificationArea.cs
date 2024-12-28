@@ -26,6 +26,8 @@ namespace Notifications.Controls
         public static readonly DependencyProperty PositionProperty =
             DependencyProperty.Register("Position", typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
 
+        public static readonly DependencyProperty ReverseOrderProperty = ReversibleStackPanel.ReverseOrderProperty.AddOwner(typeof(NotificationArea), new PropertyMetadata(false));
+
         private IList _items = null!;
 
         static NotificationArea()
@@ -67,6 +69,12 @@ namespace Notifications.Controls
         {
             get { return (NotificationPosition)GetValue(PositionProperty); }
             set { SetValue(PositionProperty, value); }
+        }
+
+        public bool ReverseOrder
+        {
+            get { return (bool)GetValue(ReverseOrderProperty); }
+            set { SetValue(ReverseOrderProperty, value); }
         }
 
         public void Clear()

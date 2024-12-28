@@ -27,6 +27,7 @@ namespace Notifications.Sample
             NotificationConstants.NotificationWidth = 300;
             NotificationConstants.DefaultNotificationFontWeight = FontWeights.Bold;
             NotificationConstants.OverlayWindowAllowRemovingPermanentOnOverflow = false;
+            NotificationConstants.OverlayWindowReverseOrder = false;
         }
 
         public string NotificationArea

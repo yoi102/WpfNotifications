@@ -8,7 +8,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:NotificationArea}">
-                    <controls:ReversibleStackPanel x:Name="PART_Items" />
+                    <controls:ReversibleStackPanel x:Name="PART_Items"
+                                                   ReverseOrder="{TemplateBinding ReverseOrder}" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="Position"
                                  Value="TopLeft">
@@ -31,9 +32,6 @@
                         <Trigger Property="Position"
                                  Value="BottomLeft">
                             <Setter TargetName="PART_Items"
-                                    Property="ReverseOrder"
-                                    Value="True" />
-                            <Setter TargetName="PART_Items"
                                     Property="VerticalAlignment"
                                     Value="Bottom" />
                             <Setter TargetName="PART_Items"
@@ -42,9 +40,6 @@
                         </Trigger>
                         <Trigger Property="Position"
                                  Value="BottomRight">
-                            <Setter TargetName="PART_Items"
-                                    Property="ReverseOrder"
-                                    Value="True" />
                             <Setter TargetName="PART_Items"
                                     Property="VerticalAlignment"
                                     Value="Bottom" />

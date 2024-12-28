@@ -18,6 +18,7 @@ namespace Notifications.Constants
         /// <summary> Overlay window maximum count </summary>
         public static bool OverlayWindowAllowRemovingPermanentOnOverflow { get; set; } = false;
         public static uint OverlayWindowMaxCount { get; set; } = uint.MaxValue;
+        public static bool OverlayWindowReverseOrder { get; set; } = false;
 
         public static Thickness OverlayWindowNotificationMargin { get; set; } = new Thickness(8, 8, 8, 0);
 

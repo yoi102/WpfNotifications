@@ -33,6 +33,10 @@
                     <CheckBox x:Name="AllowRemovingPermanentOnOverflow"
                               Margin="20 10 0 0"
                               Content="AllowRemovingPermanentOnOverflow" />
+                    <CheckBox x:Name="ReverseOrder"
+                              Margin="20 10 0 0"
+                              Content="ReverseOrder" />
+
                 </StackPanel>
             </GroupBox>
 
@@ -59,6 +63,7 @@
                               Identifier="main_window"
                               NotificationMargin="10 10 10 0"
                               MaxItems="3"
+                              ReverseOrder="{Binding ElementName=ReverseOrder,Path=IsChecked}"
                               AllowRemovingPermanentOnOverflow="{Binding ElementName=AllowRemovingPermanentOnOverflow,Path=IsChecked}"
                               Panel.ZIndex="9999" />
     </Grid>

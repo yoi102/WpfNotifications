@@ -19,6 +19,7 @@
         Loaded="NotificationsOverlayWindow_Loaded">
 
     <controls:NotificationArea x:Name="area"
+                               ReverseOrder="{x:Static constants:NotificationConstants.OverlayWindowReverseOrder}"
                                AllowRemovingPermanentOnOverflow="{x:Static constants:NotificationConstants.OverlayWindowAllowRemovingPermanentOnOverflow}"
                                Position="{x:Static constants:NotificationConstants.OverlayWindowNotificationPosition}"
                                MaxItems="{x:Static constants:NotificationConstants.OverlayWindowMaxCount}"
