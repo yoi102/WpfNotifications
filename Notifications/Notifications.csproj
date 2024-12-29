@@ -4,6 +4,27 @@
     <TargetFrameworks>net8.0-windows;net7.0-windows;net6.0-windows;net4.7-windows;net4.8-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Title>WPF toast notifications.</Title>
+    <PackageProjectUrl>https://github.com/yoi102/NotificationsWpf</PackageProjectUrl>
+    <Configurations>Debug;Release;Publish</Configurations>
+    <Description>WPF toast notifications.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>WPF toast notifications;Notifications</PackageTags>
+    <Company>yoiri</Company>
+    <PackageId>WpfNotifications</PackageId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
