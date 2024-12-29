@@ -5,7 +5,12 @@ namespace Notifications.Extensions
 {
     internal class VisualTreeHelperExtensions
     {
+#if NETFRAMEWORK
+        public static T GetParent<T>(DependencyObject child) where T : DependencyObject
+
+#else
         public static T? GetParent<T>(DependencyObject child) where T : DependencyObject
+#endif
         {
             var parent = VisualTreeHelper.GetParent(child);
 

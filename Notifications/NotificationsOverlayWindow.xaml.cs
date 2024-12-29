@@ -1,4 +1,5 @@
 ﻿using Notifications.Extensions;
+using System;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -26,7 +27,7 @@ namespace Notifications
 
             exStyle |= (int)WindowExtensions.ExtendedWindowStyles.WS_EX_TOOLWINDOW;
 
-            wndHelper.Handle.SetWindowLong((int)WindowExtensions.GetWindowLongFields.GWL_EXSTYLE, exStyle);
+            wndHelper.Handle.SetWindowLong((int)WindowExtensions.GetWindowLongFields.GWL_EXSTYLE, (IntPtr)exStyle);
         }
     }
 }

@@ -1,4 +1,7 @@
 ﻿using Notifications.Controls;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -6,14 +9,26 @@ namespace Notifications
 {
     public class NotificationManager : INotificationManager
     {
-        private static readonly List<NotificationArea> _areas = [];
+        private static readonly List<NotificationArea> _areas = new List<NotificationArea>();
+#if NETFRAMEWORK
+        private static NotificationsOverlayWindow _window;
+
+#else
         private static NotificationsOverlayWindow? _window;
+#endif
         private readonly Dispatcher _dispatcher;
 
-        public NotificationManager(Dispatcher? dispatcher = null)
-        {
-            dispatcher ??= Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+#if NETFRAMEWORK
+        public NotificationManager(Dispatcher dispatcher = null)
 
+#else
+        public NotificationManager(Dispatcher? dispatcher = null)
+#endif
+        {
+            if (dispatcher is null)
+            {
+                dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+            }
             _dispatcher = dispatcher;
         }
 
@@ -32,12 +47,24 @@ namespace Notifications
             }
         }
 
+#if NETFRAMEWORK
+
+        public void Show(object content,
+                               string areaIdentifier = "",
+                               bool closeOnClick = true,
+                               TimeSpan? expirationTime = null,
+                               Action onClick = null,
+                               Action onClose = null)
+
+#else
         public void Show(object content,
                                string areaIdentifier = "",
                                bool closeOnClick = true,
                                TimeSpan? expirationTime = null,
                                Action? onClick = null,
                                Action? onClose = null)
+
+#endif
         {
             if (content == null)
             {
@@ -46,8 +73,8 @@ namespace Notifications
 
             if (!_dispatcher.CheckAccess())
             {
-                _dispatcher.BeginInvoke(
-                    () => Show(content, areaIdentifier, closeOnClick, expirationTime, onClick, onClose)).GetAwaiter();
+                _dispatcher.BeginInvoke(new Action(
+                    () => Show(content, areaIdentifier, closeOnClick, expirationTime, onClick, onClose)));
                 return;
             }
 
@@ -64,13 +91,13 @@ namespace Notifications
                     Width = workArea.Width,
                     Height = workArea.Height,
                 };
-                _window.Closed += (_, _) =>
+                _window.Closed += (sender, args) =>
                 {
                     _window = null;
                 };
             }
 
-            if (_areas != null && _window is { IsVisible: false })
+            if (_areas != null && _window != null)
                 _window.Show();
 
             if (_areas == null) return;

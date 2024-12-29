@@ -1,12 +1,18 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Notifications
 {
     public class NotificationTemplateSelector : DataTemplateSelector
     {
+#if NETFRAMEWORK
+        private DataTemplate _defaultNotificationTemplate;
+        private DataTemplate _defaultStringTemplate;
+#else
         private DataTemplate? _defaultNotificationTemplate;
         private DataTemplate? _defaultStringTemplate;
+#endif
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {

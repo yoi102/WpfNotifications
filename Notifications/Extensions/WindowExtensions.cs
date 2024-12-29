@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Notifications.Extensions
 {
@@ -24,21 +25,21 @@ namespace Notifications.Extensions
         }
 
         [DllImport("user32.dll")]
-        public static extern nint GetWindowLong(this nint hWnd, int nIndex);
+        public static extern IntPtr GetWindowLong(this IntPtr hWnd, int nIndex);
 
-        public static nint SetWindowLong(this nint hWnd, int nIndex, nint dwNewLong)
+        public static IntPtr SetWindowLong(this IntPtr hWnd, int nIndex, IntPtr dwNewLong)
         {
             int error = 0;
-            nint result = nint.Zero;
+            IntPtr result = IntPtr.Zero;
             // Win32 SetWindowLong doesn't clear error on success
             SetLastError(0);
 
-            if (nint.Size == 4)
+            if (IntPtr.Size == 4)
             {
                 // use SetWindowLong
                 int tempResult = IntSetWindowLong(hWnd, nIndex, IntPtrToInt32(dwNewLong));
                 error = Marshal.GetLastWin32Error();
-                result = new nint(tempResult);
+                result = new IntPtr(tempResult);
             }
             else
             {
@@ -47,7 +48,7 @@ namespace Notifications.Extensions
                 error = Marshal.GetLastWin32Error();
             }
 
-            if (result == nint.Zero && error != 0)
+            if (result == IntPtr.Zero && error != 0)
             {
                 throw new System.ComponentModel.Win32Exception(error);
             }
@@ -56,12 +57,12 @@ namespace Notifications.Extensions
         }
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
-        private static extern nint IntSetWindowLongPtr(nint hWnd, int nIndex, nint dwNewLong);
+        private static extern IntPtr IntSetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLong", SetLastError = true)]
-        private static extern int IntSetWindowLong(nint hWnd, int nIndex, int dwNewLong);
+        private static extern int IntSetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
-        private static int IntPtrToInt32(nint intPtr)
+        private static int IntPtrToInt32(IntPtr intPtr)
         {
             return unchecked((int)intPtr.ToInt64());
         }

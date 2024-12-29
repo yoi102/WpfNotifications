@@ -4,8 +4,8 @@ namespace Notifications
 {
     public class NotificationContent
     {
-        public required string Title { get; set; }
-        public required string Message { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public  string Message { get; set; } = string.Empty;
 
         public NotificationType Type { get; set; }
     }

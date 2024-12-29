@@ -1,6 +1,8 @@
 ﻿using Notifications.Constants;
 using Notifications.Enums;
+using System;
 using System.Collections;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -28,8 +30,12 @@ namespace Notifications.Controls
             DependencyProperty.Register("Position", typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
 
         public static readonly DependencyProperty ReverseOrderProperty = ReversibleStackPanel.ReverseOrderProperty.AddOwner(typeof(NotificationArea), new PropertyMetadata(false));
+#if NETFRAMEWORK
+        private IList _items = null;
 
+#else
         private IList _items = null!;
+#endif
 
         static NotificationArea()
         {
@@ -89,14 +95,26 @@ namespace Notifications.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+
+#if NETFRAMEWORK
+            if (!(GetTemplateChild("PART_Items") is Panel itemsControl))
+
+#else
             if (GetTemplateChild("PART_Items") is not Panel itemsControl)
+#endif
             {
                 throw new ApplicationException();
             }
             _items = itemsControl.Children;
         }
 
+#if NETFRAMEWORK
+        public void Show(object content, bool closeOnClick, TimeSpan expirationTime, Action onClick, Action onClose)
+
+#else
+
         public void Show(object content, bool closeOnClick, TimeSpan expirationTime, Action? onClick, Action? onClose)
+#endif
         {
             var notification = CreateNotification(content);
             if (notification.Style is null)
@@ -155,13 +173,13 @@ namespace Notifications.Controls
 
         private static Notification CreateNotification(object content)
         {
-            if (content is not Notification notification)
+            if (!(content is Notification notification))
             {
-                notification = new()
+                notification = new Notification()
                 {
                     Content = content
                 };
-                if (content is not UIElement)
+                if (!(content is UIElement))
                 {
                     notification.Width = NotificationConstants.NotificationWidth;
                 }

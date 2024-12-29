@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -32,7 +35,12 @@ namespace Notifications.Controls
 
         private TimeSpan _closingAnimationTime = TimeSpan.Zero;
 
+#if NETFRAMEWORK
+        private Rectangle _countdownBar = null;
+
+#else
         private Rectangle _countdownBar = null!;
+#endif
 
         public event RoutedEventHandler NotificationClosed
         {
@@ -123,7 +131,7 @@ namespace Notifications.Controls
         {
             for (int i = 0; i < 100; i++)
             {
-                if (_countdownBar is not null)
+                if (_countdownBar != null)
                     break;
                 await Task.Delay(10);
             }
