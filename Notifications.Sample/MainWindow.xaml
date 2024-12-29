@@ -27,8 +27,13 @@
                               Width="200">
                         <ComboBoxItem  Content="TopLeft" />
                         <ComboBoxItem  Content="TopRight" />
+                        <ComboBoxItem  Content="TopCenter" />
                         <ComboBoxItem  Content="BottomLeft" />
                         <ComboBoxItem  Content="BottomRight" />
+                        <ComboBoxItem  Content="BottomCenter" />
+                        <ComboBoxItem  Content="CenterLeft" />
+                        <ComboBoxItem  Content="CenterRight" />
+                        <ComboBoxItem  Content="Center" />
                     </ComboBox>
                     <CheckBox x:Name="AllowRemovingPermanentOnOverflow"
                               Margin="20 10 0 0"

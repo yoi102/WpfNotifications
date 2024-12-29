@@ -227,8 +227,6 @@
                 Value="{StaticResource NotificationTemplateSelector}" />
         <Setter Property="FontWeight"
                 Value="{x:Static constants:NotificationConstants.DefaultNotificationFontWeight}" />
-        <Setter Property="Width"
-                Value="{x:Static constants:NotificationConstants.NotificationWidth}" />
         <Setter Property="FontSize"
                 Value="{x:Static constants:NotificationConstants.DefaultNotificationFontSize}" />
         <Setter Property="Background"

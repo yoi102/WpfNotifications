@@ -1,4 +1,5 @@
-﻿using Notifications.Enums;
+﻿using Notifications.Constants;
+using Notifications.Enums;
 using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
@@ -97,13 +98,7 @@ namespace Notifications.Controls
 
         public void Show(object content, bool closeOnClick, TimeSpan expirationTime, Action? onClick, Action? onClose)
         {
-            if (content is not Notification notification)
-            {
-                notification = new()
-                {
-                    Content = content
-                };
-            }
+            var notification = CreateNotification(content);
             if (notification.Style is null)
             {
                 Style style = (Style)this.FindResource("NotificationBase");
@@ -136,33 +131,66 @@ namespace Notifications.Controls
 
             lock (_items)
             {
-                _items.Add(new NotificationContainer(notification) { Margin = this.NotificationMargin });
-
-                if (AllowRemovingPermanentOnOverflow)
+                var notificationContainer = new NotificationContainer(notification) { Margin = this.NotificationMargin };
+                if (Position == NotificationPosition.TopLeft ||
+                    Position == NotificationPosition.BottomLeft ||
+                   Position == NotificationPosition.TopLeft)
                 {
-                    if (_items.OfType<NotificationContainer>().Count(i => !i.IsClosing) > MaxItems)
-                    {
-                        _items.OfType<NotificationContainer>().First(i => !i.IsClosing).Notification.Close();
-                    };
+                    notificationContainer.HorizontalAlignment = HorizontalAlignment.Left;
                 }
                 else
                 {
-                    var removableNotifications = _items.OfType<NotificationContainer>().Where(n => !n.IsPermanent && !n.IsClosing);
-
-                    if (removableNotifications.Count() > MaxItems)
-                    {
-                        removableNotifications.First().Notification.Close();
-                    };
+                    notificationContainer.HorizontalAlignment = HorizontalAlignment.Right;
                 }
+
+                _items.Add(notificationContainer);
+
+                RemoveOverflowNotification();
             }
 
             notification.ScheduleClose(expirationTime);
+        }
+
+        private static Notification CreateNotification(object content)
+        {
+            if (content is not Notification notification)
+            {
+                notification = new()
+                {
+                    Content = content
+                };
+                if (content is not UIElement)
+                {
+                    notification.Width = NotificationConstants.NotificationWidth;
+                }
+            }
+            return notification;
         }
 
         private void OnNotificationClosed(object sender, RoutedEventArgs routedEventArgs)
         {
             var notification = sender as Notification;
             _items.Remove(notification?.Parent);
+        }
+
+        private void RemoveOverflowNotification()
+        {
+            if (AllowRemovingPermanentOnOverflow)
+            {
+                if (_items.OfType<NotificationContainer>().Count(i => !i.IsClosing) > MaxItems)
+                {
+                    _items.OfType<NotificationContainer>().First(i => !i.IsClosing).Notification.Close();
+                };
+            }
+            else
+            {
+                var removableNotifications = _items.OfType<NotificationContainer>().Where(n => !n.IsPermanent && !n.IsClosing);
+
+                if (removableNotifications.Count() > MaxItems)
+                {
+                    removableNotifications.First().Notification.Close();
+                };
+            }
         }
     }
 }

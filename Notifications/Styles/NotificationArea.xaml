@@ -9,8 +9,36 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:NotificationArea}">
                     <controls:ReversibleStackPanel x:Name="PART_Items"
+                                               
                                                    ReverseOrder="{TemplateBinding ReverseOrder}" />
                     <ControlTemplate.Triggers>
+                        <Trigger Property="Position"
+                                 Value="Center">
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Center" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Center" />
+                        </Trigger>
+                        <Trigger Property="Position"
+                                 Value="CenterLeft">
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Center" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Left" />
+                        </Trigger>
+                        <Trigger Property="Position"
+                                 Value="CenterRight">
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Center" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Right" />
+                        </Trigger>
                         <Trigger Property="Position"
                                  Value="TopLeft">
                             <Setter TargetName="PART_Items"
@@ -29,6 +57,16 @@
                                     Property="HorizontalAlignment"
                                     Value="Right" />
                         </Trigger>
+
+                        <Trigger Property="Position"
+                                 Value="TopCenter">
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Top" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Center" />
+                        </Trigger>
                         <Trigger Property="Position"
                                  Value="BottomLeft">
                             <Setter TargetName="PART_Items"
@@ -46,6 +84,15 @@
                             <Setter TargetName="PART_Items"
                                     Property="HorizontalAlignment"
                                     Value="Right" />
+                        </Trigger>
+                        <Trigger Property="Position"
+                                 Value="BottomCenter">
+                            <Setter TargetName="PART_Items"
+                                    Property="VerticalAlignment"
+                                    Value="Bottom" />
+                            <Setter TargetName="PART_Items"
+                                    Property="HorizontalAlignment"
+                                    Value="Center" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
