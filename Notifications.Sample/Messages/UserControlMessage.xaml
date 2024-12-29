@@ -5,21 +5,45 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Notifications.Sample.Messages"
              Width="300"
-             Height="200"
+             Height="50"
              mc:Ignorable="d">
-    <Border CornerRadius="10"
-            Background="BlueViolet">
+    <Border>
+        <Border.Background>
+            <LinearGradientBrush EndPoint="1,1"
+                                 Opacity="0.8">
+                <GradientStop Color="Transparent"
+                              Offset="0.0" />
+                <GradientStop Color="Transparent"
+                              Offset="0.2" />
+                <GradientStop Color="#424140"
+                              Offset="0.55" />
+                <GradientStop Color="#424153"
+                              Offset="1" />
+            </LinearGradientBrush>
+        </Border.Background>
         <Grid Margin="5">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="0.2*" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-            <Grid>
-                <TextBlock Text="UserControlMessage"
-                           VerticalAlignment="Center" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition  Width="auto" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Message"
+                       Margin=" 0 0 10 0"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right" />
+            <TextBlock Text="×2"
+                       Margin=" 0 0 10 0"
+                       Grid.Column="1"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Right" />
+            <Grid Grid.Column="2"
+                  Width="80">
+                <Image Margin=" 0 0 5 0"
+                       Height="30"
+                       Source="/Resources/img.jpg" />
             </Grid>
-            <Image Grid.Row="2"
-                   Source="/Resources/img.jpg" />
+
         </Grid>
     </Border>
 </UserControl>

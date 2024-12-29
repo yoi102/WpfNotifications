@@ -111,9 +111,9 @@
                 <RowDefinition  Height="auto" />
                 <RowDefinition />
             </Grid.RowDefinitions>
-            <Rectangle x:Name="PART_ColorBar"
+            <Rectangle x:Name="PART_CountdownBar"
                        HorizontalAlignment="Left"
-                       Fill="White"
+                       Fill="{TemplateBinding CountdownBarFill}"
                        Height="0"
                        Width="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth}" />
             <ContentPresenter Grid.Row="1" />
@@ -157,6 +157,7 @@
                 </BeginStoryboard>
             </EventTrigger>
         </ControlTemplate.Triggers>
+
     </ControlTemplate>
 
     <Style TargetType="{x:Type controls:Notification}"
@@ -165,10 +166,6 @@
                 Value="True" />
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
-        <Setter Property="ContentTemplateSelector"
-                Value="{StaticResource NotificationTemplateSelector}" />
-        <Setter Property="Template"
-                Value="{StaticResource NotificationTemplate}" />
         <Setter Property="LayoutTransform">
             <Setter.Value>
                 <ScaleTransform />
@@ -182,10 +179,52 @@
                                   Opacity=".25" />
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0"
+                                         To="1"
+                                         Duration="0:0:.5" />
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
+                                         From="0"
+                                         To="1"
+                                         Duration="0:0:.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
+                                         From="0"
+                                         To="1"
+                                         Duration="0:0:.2" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="controls:Notification.NotificationCloseInvoked">
+                <BeginStoryboard>
+                    <Storyboard Duration="0:0:.1">
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
+                                         From="1"
+                                         To="0.1"
+                                         Duration="0:0:.2" />
+                    </Storyboard>
+                </BeginStoryboard>
+                <BeginStoryboard>
+                    <Storyboard BeginTime="0:0:.2">
+                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
+                                         From="1"
+                                         To="0"
+                                         Duration="0:0:.2" />
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="{x:Type controls:Notification}"
            BasedOn="{StaticResource NotificationBase}">
+        <Setter Property="Template"
+                Value="{StaticResource NotificationTemplate}" />
+        <Setter Property="ContentTemplateSelector"
+                Value="{StaticResource NotificationTemplateSelector}" />
         <Setter Property="FontWeight"
                 Value="{x:Static constants:NotificationConstants.DefaultNotificationFontWeight}" />
         <Setter Property="Width"

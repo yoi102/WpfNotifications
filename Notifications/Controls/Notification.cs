@@ -6,9 +6,13 @@ using System.Windows.Shapes;
 
 namespace Notifications.Controls
 {
-    [TemplatePart(Name = "PART_ColorBar", Type = typeof(Rectangle))]
+    [TemplatePart(Name = "PART_CountdownBar", Type = typeof(Rectangle))]
     public class Notification : ContentControl
     {
+        // Using a DependencyProperty as the backing store for CountdownBarFill.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty CountdownBarFillProperty =
+            DependencyProperty.Register("CountdownBarFill", typeof(Brush), typeof(Notification), new PropertyMetadata(new SolidColorBrush(Colors.White)));
+
         // Using a DependencyProperty as the backing store for ExpirationTime.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty ExpirationTimeProperty =
             DependencyProperty.Register("ExpirationTime", typeof(Duration), typeof(Notification), new PropertyMetadata(new Duration(TimeSpan.FromSeconds(1))));
@@ -28,7 +32,7 @@ namespace Notifications.Controls
 
         private TimeSpan _closingAnimationTime = TimeSpan.Zero;
 
-        private Rectangle _colorBar = null!;
+        private Rectangle _countdownBar = null!;
 
         public event RoutedEventHandler NotificationClosed
         {
@@ -48,6 +52,12 @@ namespace Notifications.Controls
             remove { RemoveHandler(NotificationClosingEvent, value); }
         }
 
+        public Brush CountdownBarFill
+        {
+            get { return (Brush)GetValue(CountdownBarFillProperty); }
+            set { SetValue(CountdownBarFillProperty, value); }
+        }
+
         public Duration ExpirationTime
         {
             get { return (Duration)GetValue(ExpirationTimeProperty); }
@@ -61,6 +71,7 @@ namespace Notifications.Controls
             get { return (bool)GetValue(IsPermanentProperty); }
             set { SetValue(IsPermanentProperty, value); }
         }
+
         public async void Close()
         {
             if (IsClosing)
@@ -77,9 +88,14 @@ namespace Notifications.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            _colorBar = (Rectangle)GetTemplateChild("PART_ColorBar");
+            _countdownBar = (Rectangle)GetTemplateChild("PART_CountdownBar");
 
-            var closingStoryboards = Template.Triggers.OfType<EventTrigger>().FirstOrDefault(t => t.RoutedEvent == NotificationCloseInvokedEvent)?.Actions.OfType<BeginStoryboard>().Select(a => a.Storyboard);
+            var triggers = Style.Triggers;
+            if (triggers.Count == 0)
+            {
+                triggers = Template.Triggers;
+            }
+            var closingStoryboards = triggers.OfType<EventTrigger>().FirstOrDefault(t => t.RoutedEvent == NotificationCloseInvokedEvent)?.Actions.OfType<BeginStoryboard>().Select(a => a.Storyboard);
             _closingAnimationTime = new TimeSpan(closingStoryboards?.Max(s => Math.Min((s.Duration.HasTimeSpan ? s.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero) : TimeSpan.MaxValue).Ticks, s.Children.Select(ch => ch.Duration.TimeSpan + (s.BeginTime ?? TimeSpan.Zero)).Max().Ticks)) ?? 0);
         }
 
@@ -107,17 +123,17 @@ namespace Notifications.Controls
         {
             for (int i = 0; i < 100; i++)
             {
-                if (_colorBar is not null)
+                if (_countdownBar is not null)
                     break;
                 await Task.Delay(10);
             }
 
-            if (_colorBar is null)
+            if (_countdownBar is null)
                 return;
-            _colorBar.Height = 5;
+            _countdownBar.Height = 5;
             DoubleAnimation widthAnimation = new DoubleAnimation
             {
-                From = _colorBar.RenderSize.Width,
+                From = _countdownBar.RenderSize.Width,
                 To = 0,
                 Duration = new Duration(expirationTime),
                 EasingFunction = new QuadraticEase()
@@ -126,7 +142,7 @@ namespace Notifications.Controls
             Storyboard storyboard = new Storyboard();
             storyboard.Children.Add(widthAnimation);
 
-            Storyboard.SetTarget(widthAnimation, _colorBar);
+            Storyboard.SetTarget(widthAnimation, _countdownBar);
             Storyboard.SetTargetProperty(widthAnimation, new PropertyPath(FrameworkElement.WidthProperty));
 
             storyboard.Begin();
