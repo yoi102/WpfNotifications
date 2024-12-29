@@ -20,6 +20,7 @@ namespace Notifications.Constants
         public static uint OverlayWindowMaxCount { get; set; } = uint.MaxValue;
         public static bool OverlayWindowReverseOrder { get; set; } = false;
 
+        public static Thickness OverlayWindowMargin { get; set; } = new Thickness(0, 0, 0, 0);
         public static Thickness OverlayWindowNotificationMargin { get; set; } = new Thickness(8, 8, 8, 0);
 
         /// <summary> Overlay message position </summary>

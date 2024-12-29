@@ -136,10 +136,12 @@ namespace Notifications.Controls
                     Position == NotificationPosition.BottomLeft ||
                    Position == NotificationPosition.TopLeft)
                 {
+                    notification.HorizontalAlignment = HorizontalAlignment.Left;
                     notificationContainer.HorizontalAlignment = HorizontalAlignment.Left;
                 }
                 else
                 {
+                    notification.HorizontalAlignment = HorizontalAlignment.Right;
                     notificationContainer.HorizontalAlignment = HorizontalAlignment.Right;
                 }
 

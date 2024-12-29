@@ -27,7 +27,7 @@ namespace Notifications.Sample
             NotificationConstants.NotificationWidth = 300;
             NotificationConstants.DefaultNotificationFontWeight = FontWeights.Bold;
             NotificationConstants.OverlayWindowAllowRemovingPermanentOnOverflow = false;
-            NotificationConstants.OverlayWindowReverseOrder = false;
+            NotificationConstants.OverlayWindowReverseOrder = true;
         }
 
         public string NotificationArea
@@ -116,7 +116,7 @@ namespace Notifications.Sample
         {
             UserControlMessage userControlMessage = new UserControlMessage();
 
-            notificationManager.Show(userControlMessage, NotificationArea);
+            notificationManager.Show(userControlMessage, NotificationArea,false);
         }
     }
 }
