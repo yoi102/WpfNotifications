@@ -8,19 +8,38 @@
         Background="Gray"
         mc:Ignorable="d"
         Title="MainWindow"
-        Height="800"
-        Width="1000">
+        Height="1000"
+        Width="1500">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <GroupBox Header="ShowCases">
 
-        <UniformGrid>
+            <ntf:NotificationArea x:Name="notificationArea"
+                                  Identifier="main_window"
+                                  NotificationMargin="10 10 10 0"
+                                  MaxItems="3"
+                                  ReverseOrder="{Binding ElementName=ReverseOrder,Path=IsChecked}"
+                                  AllowRemovingPermanentOnOverflow="{Binding ElementName=AllowRemovingPermanentOnOverflow,Path=IsChecked}"
+                                  Panel.ZIndex="9999" />
+        </GroupBox>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
             <GroupBox Header="Option">
                 <StackPanel>
 
                     <CheckBox x:Name="isInWindow"
+                              IsChecked="True"
                               Margin="20 20 0 0"
                               Content="InWindow" />
                     <ComboBox Margin="20 10 0 0"
-                              SelectedIndex="3"
+                              SelectedIndex="4"
                               Name="comb"
                               HorizontalAlignment="Left"
                               SelectionChanged="comb_SelectionChanged"
@@ -36,40 +55,39 @@
                         <ComboBoxItem  Content="Center" />
                     </ComboBox>
                     <CheckBox x:Name="AllowRemovingPermanentOnOverflow"
+                              IsChecked="True"
                               Margin="20 10 0 0"
                               Content="AllowRemovingPermanentOnOverflow" />
                     <CheckBox x:Name="ReverseOrder"
+                              IsChecked="True"
                               Margin="20 10 0 0"
                               Content="ReverseOrder" />
 
                 </StackPanel>
             </GroupBox>
 
-            <Button Margin="20"
-                    Content="Custom"
-                    Click="CustomButtonClick" />
-            <Button Margin="20"
-                    Content="Message"
-                    Click="MessageButtonClick" />
-            <Button Margin="20"
-                    Content="MessageWithTitle"
-                    Click="MessageWithTitleButtonClick" />
-            <Button Margin="20"
-                    Content="UserControlMessage"
-                    Click="UserControlMessageButtonClick" />
-            <Button Margin="20"
-                    Content="CustomNotification"
-                    Click="CustomNotificationButtonClick" />
-            <Button Margin="20"
-                    Content="Clear"
-                    Click="ClearButtonClick" />
-        </UniformGrid>
-        <ntf:NotificationArea x:Name="notificationArea"
-                              Identifier="main_window"
-                              NotificationMargin="10 10 10 0"
-                              MaxItems="3"
-                              ReverseOrder="{Binding ElementName=ReverseOrder,Path=IsChecked}"
-                              AllowRemovingPermanentOnOverflow="{Binding ElementName=AllowRemovingPermanentOnOverflow,Path=IsChecked}"
-                              Panel.ZIndex="9999" />
+            <UniformGrid Grid.Column="1">
+                <Button Margin="2"
+                        Content="Custom"
+                        Click="CustomButtonClick" />
+                <Button Margin="2"
+                        Content="Message"
+                        Click="MessageButtonClick" />
+                <Button Margin="2"
+                        Content="MessageWithTitle"
+                        Click="MessageWithTitleButtonClick" />
+                <Button Margin="2"
+                        Content="UserControlMessage"
+                        Click="UserControlMessageButtonClick" />
+                <Button Margin="2"
+                        Content="CustomNotification"
+                        Click="CustomNotificationButtonClick" />
+                <Button Margin="2"
+                        Content="Clear"
+                        Click="ClearButtonClick" />
+            </UniformGrid>
+
+        </Grid>
+
     </Grid>
 </Window>
