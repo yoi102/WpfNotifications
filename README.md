@@ -48,7 +48,7 @@ WPF toast notifications.
 
 
 
-* 在自定义控件中，可继承`Notification`监听`ntf:Notification.NotificationClosing`路由事件，获取`ExpirationTime`值以设置倒计时条
+* 在自定义控件中，可继承`Notification`监听`ntf:Notification.NotificationClosing`路由事件，获取`ExpirationTime`值以设置倒计时条. * 在自定义控件中，可以自定义设置`Width``Height`来控制通知的宽高。
 ```xaml
 <ntf:Notification x:Class="Notifications.Sample.Messages.InformationMessage"
                   ............
