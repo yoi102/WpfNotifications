@@ -77,9 +77,15 @@ WPF toast notifications.
 </ntf:Notification>
 
 ```
+在继承`ntf:Notification`后，可设置按钮在Csharp代码中控制通知的关闭
 
+```csharp
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
 
-
+```
 
 
 
