@@ -7,7 +7,7 @@ WPF toast notifications.
 
 ## 使用
 * 修改你的App.xaml 文件。*注意：ShutdownMode="OnMainWindowClose" 此设置防止程序无法正常关闭。
-```
+```xaml
 
 <Application x:Class="Notifications.Sample.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -27,7 +27,7 @@ WPF toast notifications.
 
 * 在需要显示通知的地方放置`ntf:NotificationArea` 并且设置`Identifier`
 
-```
+```xaml
             <ntf:NotificationArea Identifier="main_window"
                                   NotificationMargin="10 10 10 0"
                                   MaxItems="3"/>
@@ -36,12 +36,12 @@ WPF toast notifications.
 
 
 * 指定`Identifier`显示通知
-```
+```csharp
             notificationManager.Show("title", "main_window");
 ```
 * 也可传入自定义控件，显示自定义UI的通知
 
-```
+```csharp
             UserControlMessage userControlMessage = new UserControlMessage();
             notificationManager.Show(userControlMessage, "main_window",false);
 ```
@@ -49,7 +49,7 @@ WPF toast notifications.
 
 
 * 在自定义控件中，可继承`Notification`监听`ntf:Notification.NotificationClosing`路由事件，获取`ExpirationTime`值以设置倒计时条
-```
+```xaml
 <ntf:Notification x:Class="Notifications.Sample.Messages.InformationMessage"
                   ............
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
