@@ -4,6 +4,10 @@ WPF toast notifications.
 ## 演示
 ![PixPin_2024-12-29_22-39-32](https://github.com/user-attachments/assets/9fb6bb0e-64d7-4877-9a9d-bb801d26b328)
 
+## 安装
+```
+Install-Package WpfNotifications
+```
 
 ## 使用
 * 修改你的App.xaml 文件。*注意：ShutdownMode="OnMainWindowClose" 此设置防止程序无法正常关闭。
