@@ -1,26 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows;net7.0-windows;net6.0-windows;net4.7-windows;net4.8-windows</TargetFrameworks>
+    <TargetFrameworks>net9.0-windows;net8.0-windows;net7.0-windows;net6.0-windows;net4.7-windows;net4.8-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <Title>WPF toast notifications.</Title>
     <PackageProjectUrl>https://github.com/yoi102/NotificationsWpf</PackageProjectUrl>
     <Configurations>Debug;Release;Publish</Configurations>
     <Description>WPF toast notifications.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>WPF toast notifications;Notifications</PackageTags>
-    <Company>yoiri</Company>
+    <Company>https://github.com/yoi102</Company>
     <PackageId>WpfNotifications</PackageId>
     <Authors>yoiri</Authors>
-    <PackageIcon>9cdf15047055ff279ef45fc9380762b9.jpeg</PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <SignAssembly>False</SignAssembly>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <Version>1.0.0.1</Version>
+  </PropertyGroup>
+    
   <ItemGroup>
-    <None Include="..\..\..\..\Downloads\9cdf15047055ff279ef45fc9380762b9.jpeg">
+    <None Include="..\icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
