@@ -14,9 +14,16 @@
     <PackageTags>WPF toast notifications;Notifications</PackageTags>
     <Company>yoiri</Company>
     <PackageId>WpfNotifications</PackageId>
+    <Authors>yoiri</Authors>
+    <PackageIcon>9cdf15047055ff279ef45fc9380762b9.jpeg</PackageIcon>
+    <SignAssembly>False</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\..\Downloads\9cdf15047055ff279ef45fc9380762b9.jpeg">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
