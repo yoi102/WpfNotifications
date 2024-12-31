@@ -150,18 +150,7 @@ namespace Notifications.Controls
             lock (_items)
             {
                 var notificationContainer = new NotificationContainer(notification) { Margin = this.NotificationMargin };
-                if (Position == NotificationPosition.TopLeft ||
-                    Position == NotificationPosition.BottomLeft ||
-                   Position == NotificationPosition.TopLeft)
-                {
-                    notification.HorizontalAlignment = HorizontalAlignment.Left;
-                    notificationContainer.HorizontalAlignment = HorizontalAlignment.Left;
-                }
-                else
-                {
-                    notification.HorizontalAlignment = HorizontalAlignment.Right;
-                    notificationContainer.HorizontalAlignment = HorizontalAlignment.Right;
-                }
+                notificationContainer.HorizontalAlignment = GetAlignmentForPosition();
 
                 _items.Add(notificationContainer);
 
@@ -169,6 +158,20 @@ namespace Notifications.Controls
             }
 
             notification.ScheduleClose(expirationTime);
+        }
+
+        private HorizontalAlignment GetAlignmentForPosition()
+        {
+            if (Position == NotificationPosition.TopLeft ||
+                                Position == NotificationPosition.BottomLeft ||
+                               Position == NotificationPosition.TopLeft)
+            {
+                return HorizontalAlignment.Left;
+            }
+            else
+            {
+                return HorizontalAlignment.Right;
+            }
         }
 
         private static Notification CreateNotification(object content)
