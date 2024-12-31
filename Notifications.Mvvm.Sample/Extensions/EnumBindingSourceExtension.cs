@@ -2,9 +2,6 @@
 
 namespace Notifications.Mvvm.Sample.Extensions
 {
-    /// <summary>
-    /// 用于 combobox 枚举源的绑定
-    /// </summary>
     public class EnumBindingSourceExtension : MarkupExtension
     {
         private Type? enumType;
