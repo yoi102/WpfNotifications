@@ -1,17 +1,20 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Notifications.Enums;
 using Notifications.Mvvm.Sample.Interfaces;
 
 namespace Notifications.Mvvm.Sample.ViewModel
 {
     internal partial class MainViewModel : ObservableObject
     {
+        private readonly INotificationService notificationService;
+
         [ObservableProperty]
         private bool inWindow = true;
 
-        [ObservableProperty]
-        private NotificationPosition notificationPosition = NotificationPosition.BottomRight;
+        public MainViewModel(INotificationService notificationService)
+        {
+            this.notificationService = notificationService;
+        }
 
         public string NotificationArea
         {
@@ -24,12 +27,10 @@ namespace Notifications.Mvvm.Sample.ViewModel
                 return "";
             }
         }
-
-        private readonly INotificationService notificationService;
-
-        public MainViewModel(INotificationService notificationService)
+        [RelayCommand]
+        private void Clear()
         {
-            this.notificationService = notificationService;
+            notificationService.Clear(NotificationArea);
         }
 
         [RelayCommand]
@@ -45,9 +46,9 @@ namespace Notifications.Mvvm.Sample.ViewModel
         }
 
         [RelayCommand]
-        private void UserControlMessage()
+        private void DefaultMessage()
         {
-            notificationService.ShowUserControlMessage("xxx_Item", "1", NotificationArea);
+            notificationService.ShowDefaultMessage("Message", NotificationArea);
         }
 
         [RelayCommand]
@@ -59,15 +60,9 @@ namespace Notifications.Mvvm.Sample.ViewModel
         }
 
         [RelayCommand]
-        private void DefaultMessage()
+        private void UserControlMessage()
         {
-            notificationService.ShowDefaultMessage("Message", NotificationArea);
-        }
-
-        [RelayCommand]
-        private void Clear()
-        {
-            notificationService.Clear(NotificationArea);
+            notificationService.ShowUserControlMessage("xxx_Item", "1", NotificationArea);
         }
     }
 }

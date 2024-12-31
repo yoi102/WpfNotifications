@@ -29,7 +29,7 @@
                     </md:DialogHost>
 
                     <ntf:NotificationArea x:Name="notificationArea"
-                                          Position="{Binding NotificationPosition}"
+                                          Position="{Binding ElementName= comb,Path=SelectedItem}"
                                           Panel.ZIndex="9999"
                                           AllowRemovingPermanentOnOverflow="{Binding ElementName=AllowRemovingPermanentOnOverflow, Path=IsChecked}"
                                           Identifier="main_window"
@@ -56,7 +56,7 @@
                                   Margin="20,10,0,0"
                                   HorizontalAlignment="Left"
                                   ItemsSource="{Binding Source={ex:EnumBindingSource {x:Type em:NotificationPosition}}}"
-                                  SelectedValue="{Binding NotificationPosition}">
+                                  SelectedIndex="4">
                         </ComboBox>
                         <CheckBox x:Name="AllowRemovingPermanentOnOverflow"
                                   Margin="20,10,0,0"
