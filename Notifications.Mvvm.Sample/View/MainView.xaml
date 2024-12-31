@@ -33,7 +33,7 @@
                                           Panel.ZIndex="9999"
                                           AllowRemovingPermanentOnOverflow="{Binding ElementName=AllowRemovingPermanentOnOverflow, Path=IsChecked}"
                                           Identifier="main_window"
-                                          MaxItems="3"
+                                          MaxItems="4"
                                           NotificationMargin="10 10 10 0"
                                           ReverseOrder="{Binding ElementName=ReverseOrder, Path=IsChecked}" />
                 </Grid>
