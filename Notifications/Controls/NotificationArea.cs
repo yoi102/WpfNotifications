@@ -12,7 +12,7 @@ namespace Notifications.Controls
     {
         // Using a DependencyProperty as the backing store for AllowRemovingPermanentOnOverflow.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty AllowRemovingPermanentOnOverflowProperty =
-            DependencyProperty.Register("AllowRemovingPermanentOnOverflow", typeof(bool), typeof(NotificationArea), new PropertyMetadata(false));
+            DependencyProperty.Register("AllowRemovingPermanentOnOverflow", typeof(bool), typeof(NotificationArea), new PropertyMetadata(true));
 
         // Using a DependencyProperty as the backing store for Identifier.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IdentifierProperty =

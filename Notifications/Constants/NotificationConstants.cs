@@ -16,7 +16,7 @@ namespace Notifications.Constants
         public static Brush DefaultNotificationForeground { get; set; } = new SolidColorBrush(Colors.White);
 
         /// <summary> Overlay window maximum count </summary>
-        public static bool OverlayWindowAllowRemovingPermanentOnOverflow { get; set; } = false;
+        public static bool OverlayWindowAllowRemovingPermanentOnOverflow { get; set; } = true;
         public static uint OverlayWindowMaxCount { get; set; } = uint.MaxValue;
         public static bool OverlayWindowReverseOrder { get; set; } = false;
 
