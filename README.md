@@ -43,17 +43,30 @@ Install-Package WpfNotifications
 ```csharp
             notificationManager.Show("title", "main_window");
 ```
-* 也可传入自定义控件，显示自定义UI的通知
+
+## 默认
+WpfNotifications 有2种默认通知样式。
+* 你可以用以下代码 使用样式1。
+```csharp
+            notificationManager.Show("title", NotificationArea);
+```
+![image](https://github.com/user-attachments/assets/248e5c8c-9c0b-466d-9ec9-cabd5be60e9f)
+* 亦可使用如下代码使用样式2。
+```csharp
+            notificationManager.Show("title", "message", NotificationType.Error, NotificationArea);
+```
+![image](https://github.com/user-attachments/assets/366f6ccc-029e-45a7-a750-d85015d02a1d)
+
+## 自定义
+* 如果默认样式无法满足你的需求，也可传入自定义控件，显示自定义样式
 
 ```csharp
             UserControlMessage userControlMessage = new UserControlMessage();
             notificationManager.Show(userControlMessage, "main_window",false);
 ```
 
-
-
 * 在自定义控件中，可继承`Notification`监听`ntf:Notification.NotificationClosing`路由事件，获取`ExpirationTime`值以设置倒计时条.
- * 在自定义控件中，可以自定义设置`Width``Height`来控制通知的宽高。
+   *通知控件的宽高可通过`Width``Height`来控制
 ```xaml
 <ntf:Notification x:Class="Notifications.Sample.Messages.InformationMessage"
                   ............
@@ -81,7 +94,7 @@ Install-Package WpfNotifications
 </ntf:Notification>
 
 ```
-在继承`ntf:Notification`后，可设置按钮在Csharp代码中控制通知的关闭
+* 在继承`ntf:Notification`后，可设置按钮在Csharp代码中控制通知的关闭
 
 ```csharp
         private void Button_Click(object sender, RoutedEventArgs e)
