@@ -111,6 +111,10 @@ namespace Notifications
         internal static void AddArea(NotificationArea area)
         {
             _areas.Add(area);
+            area.Unloaded+= (sender,e)=>
+            {
+                _areas.Remove((NotificationArea)sender);
+            };
         }
     }
 }
