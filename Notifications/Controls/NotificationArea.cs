@@ -1,219 +1,338 @@
-﻿using Notifications.Constants;
+using Notifications.Constants;
 using Notifications.Enums;
+using Notifications.Internal;
 using System;
 using System.Collections;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace Notifications.Controls
 {
+    /// <summary>Hosts and positions notifications inside an application window.</summary>
     public class NotificationArea : Control
     {
-        // Using a DependencyProperty as the backing store for AllowRemovingPermanentOnOverflow.  This enables animation, styling, binding, etc...
+        /// <summary>Identifies the <see cref="AllowRemovingPermanentOnOverflow"/> dependency property.</summary>
         public static readonly DependencyProperty AllowRemovingPermanentOnOverflowProperty =
-            DependencyProperty.Register("AllowRemovingPermanentOnOverflow", typeof(bool), typeof(NotificationArea), new PropertyMetadata(true));
+            DependencyProperty.Register(nameof(AllowRemovingPermanentOnOverflow), typeof(bool), typeof(NotificationArea), new PropertyMetadata(true));
 
-        // Using a DependencyProperty as the backing store for Identifier.  This enables animation, styling, binding, etc...
+        /// <summary>Identifies the <see cref="Identifier"/> dependency property.</summary>
         public static readonly DependencyProperty IdentifierProperty =
-            DependencyProperty.Register("Identifier", typeof(string), typeof(NotificationArea), new PropertyMetadata(""));
+            DependencyProperty.Register(
+                nameof(Identifier),
+                typeof(string),
+                typeof(NotificationArea),
+                new PropertyMetadata(string.Empty),
+                value => value != null);
 
+        /// <summary>Identifies the <see cref="MaxItems"/> dependency property.</summary>
         public static readonly DependencyProperty MaxItemsProperty =
-            DependencyProperty.Register("MaxItems", typeof(uint), typeof(NotificationArea), new PropertyMetadata(uint.MaxValue));
+            DependencyProperty.Register(nameof(MaxItems), typeof(uint), typeof(NotificationArea), new PropertyMetadata(uint.MaxValue));
 
-        // Using a DependencyProperty as the backing store for NotificationMargin.  This enables animation, styling, binding, etc...
+        /// <summary>Identifies the <see cref="NotificationMargin"/> dependency property.</summary>
         public static readonly DependencyProperty NotificationMarginProperty =
-            DependencyProperty.Register("NotificationMargin", typeof(Thickness), typeof(NotificationArea), new PropertyMetadata(new Thickness(8, 8, 8, 0)));
+            DependencyProperty.Register(nameof(NotificationMargin), typeof(Thickness), typeof(NotificationArea), new PropertyMetadata(new Thickness(8, 8, 8, 0)));
 
-        // Using a DependencyProperty as the backing store for Position.  This enables animation, styling, binding, etc...
+        /// <summary>Identifies the <see cref="Position"/> dependency property.</summary>
         public static readonly DependencyProperty PositionProperty =
-            DependencyProperty.Register("Position", typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
+            DependencyProperty.Register(nameof(Position), typeof(NotificationPosition), typeof(NotificationArea), new PropertyMetadata(NotificationPosition.BottomRight));
 
-        public static readonly DependencyProperty ReverseOrderProperty = ReversibleStackPanel.ReverseOrderProperty.AddOwner(typeof(NotificationArea), new PropertyMetadata(false));
-#if NETFRAMEWORK
-        private IList _items = null;
+        /// <summary>Identifies the <see cref="ReverseOrder"/> dependency property.</summary>
+        public static readonly DependencyProperty ReverseOrderProperty =
+            ReversibleStackPanel.ReverseOrderProperty.AddOwner(typeof(NotificationArea), new PropertyMetadata(false));
 
-#else
-        private IList _items = null!;
-#endif
+        private IList? _items;
 
         static NotificationArea()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(NotificationArea),
+            DefaultStyleKeyProperty.OverrideMetadata(
+                typeof(NotificationArea),
                 new FrameworkPropertyMetadata(typeof(NotificationArea)));
         }
 
+        /// <summary>Initializes a notification area.</summary>
         public NotificationArea()
         {
-            NotificationManager.AddArea(this);
+            Loaded += OnLoaded;
+            Unloaded += OnUnloaded;
         }
 
+        internal event EventHandler? ItemsChanged;
+
+        /// <summary>Gets or sets whether overflow may evict permanent notifications.</summary>
         public bool AllowRemovingPermanentOnOverflow
         {
-            get { return (bool)GetValue(AllowRemovingPermanentOnOverflowProperty); }
-            set { SetValue(AllowRemovingPermanentOnOverflowProperty, value); }
+            get => (bool)GetValue(AllowRemovingPermanentOnOverflowProperty);
+            set => SetValue(AllowRemovingPermanentOnOverflowProperty, value);
         }
 
+        /// <summary>Gets or sets the unique manager-visible area identifier.</summary>
         public string Identifier
         {
-            get { return (string)GetValue(IdentifierProperty); }
-            set { SetValue(IdentifierProperty, value); }
+            get => (string)GetValue(IdentifierProperty);
+            set => SetValue(IdentifierProperty, value);
         }
 
+        /// <summary>Gets or sets the maximum number of active notifications.</summary>
         public uint MaxItems
         {
-            get { return (uint)GetValue(MaxItemsProperty); }
-            set { SetValue(MaxItemsProperty, value); }
+            get => (uint)GetValue(MaxItemsProperty);
+            set => SetValue(MaxItemsProperty, value);
         }
 
+        /// <summary>Gets or sets the margin applied to each notification.</summary>
         public Thickness NotificationMargin
         {
-            get { return (Thickness)GetValue(NotificationMarginProperty); }
-            set { SetValue(NotificationMarginProperty, value); }
+            get => (Thickness)GetValue(NotificationMarginProperty);
+            set => SetValue(NotificationMarginProperty, value);
         }
 
+        /// <summary>Gets or sets the notification anchor position.</summary>
         public NotificationPosition Position
         {
-            get { return (NotificationPosition)GetValue(PositionProperty); }
-            set { SetValue(PositionProperty, value); }
+            get => (NotificationPosition)GetValue(PositionProperty);
+            set => SetValue(PositionProperty, value);
         }
 
+        /// <summary>Gets or sets whether notifications are arranged in reverse order.</summary>
         public bool ReverseOrder
         {
-            get { return (bool)GetValue(ReverseOrderProperty); }
-            set { SetValue(ReverseOrderProperty, value); }
+            get => (bool)GetValue(ReverseOrderProperty);
+            set => SetValue(ReverseOrderProperty, value);
         }
 
+        internal int NotificationCount => _items?.OfType<NotificationContainer>().Count() ?? 0;
+
+        /// <summary>Starts closing all notifications in this area.</summary>
         public void Clear()
         {
-            foreach (var item in _items.OfType<NotificationContainer>().ToArray())
-            {
-                item.Notification.Close();
-            }
+            _ = ClearAsync(NotificationCloseReason.Cleared);
         }
 
+        internal Task ClearAsync(NotificationCloseReason closeReason)
+        {
+            VerifyAccess();
+            if (_items is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            var notifications = _items.OfType<NotificationContainer>()
+                .Select(item => item.Notification)
+                .ToArray();
+            var closeTasks = notifications
+                .Select(notification => notification.CloseAsync(closeReason))
+                .ToArray();
+            return Task.WhenAll(closeTasks);
+        }
+
+        /// <inheritdoc />
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
 
-#if NETFRAMEWORK
-            if (!(GetTemplateChild("PART_Items") is Panel itemsControl))
-
-#else
-            if (GetTemplateChild("PART_Items") is not Panel itemsControl)
-#endif
+            if (GetTemplateChild("PART_Items") is not Panel itemsPanel)
             {
-                throw new ApplicationException();
+                throw new InvalidOperationException("The NotificationArea template must contain a Panel named PART_Items.");
             }
-            _items = itemsControl.Children;
+
+            _items = itemsPanel.Children;
+            ItemsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-#if NETFRAMEWORK
-        public void Show(object content, bool closeOnClick, TimeSpan expirationTime, Action onClick, Action onClose)
-
-#else
-
-        public void Show(object content, bool closeOnClick, TimeSpan expirationTime, Action? onClick, Action? onClose)
-#endif
+        /// <summary>Displays content directly in this area.</summary>
+        public void Show(
+            object content,
+            bool closeOnClick,
+            TimeSpan expirationTime,
+            Action? onClick,
+            Action? onClose)
         {
+            _ = ShowManaged(
+                content,
+                closeOnClick,
+                expirationTime,
+                onClick,
+                onClose,
+                new NotificationDisplayOptions());
+        }
+
+        /// <summary>Displays content directly in this area using explicit presentation options.</summary>
+        /// <returns>The displayed control, or <see langword="null"/> when this area is not loaded.</returns>
+        public Notification? Show(
+            object content,
+            TimeSpan expirationTime,
+            NotificationDisplayOptions displayOptions,
+            bool closeOnClick = false,
+            Action? onClick = null,
+            Action? onClose = null)
+        {
+            if (displayOptions is null)
+            {
+                throw new ArgumentNullException(nameof(displayOptions));
+            }
+
+            return ShowManaged(
+                content,
+                closeOnClick,
+                expirationTime,
+                onClick,
+                onClose,
+                displayOptions);
+        }
+
+        internal Notification? ShowManaged(
+            object content,
+            bool closeOnClick,
+            TimeSpan expirationTime,
+            Action? onClick,
+            Action? onClose,
+            NotificationDisplayOptions displayOptions)
+        {
+            VerifyAccess();
+            if (content is null)
+            {
+                throw new ArgumentNullException(nameof(content));
+            }
+
+            Notification.ValidateExpirationTime(expirationTime, nameof(expirationTime));
+
+            if (!IsLoaded || _items is null)
+            {
+                return null;
+            }
+
             var notification = CreateNotification(content);
+            if (notification.Parent != null)
+            {
+                throw new InvalidOperationException("A Notification instance that already has a visual parent cannot be shown again.");
+            }
+
+            displayOptions.ApplyTo(notification);
             if (notification.Style is null)
             {
-                Style style = (Style)this.FindResource("NotificationBase");
-
-                notification.Style = style;
+                notification.Style = (Style)FindResource(typeof(Notification));
             }
+
+            notification.NotificationClosed += OnNotificationClosed;
+            if (onClose != null)
+            {
+                notification.NotificationClosed += (_, _) => onClose();
+            }
+
             if (closeOnClick)
             {
-                notification.MouseLeftButtonDown += (sender, args) =>
+                notification.MouseLeftButtonUp += (_, _) =>
                 {
-                    onClick?.Invoke();
-                    (sender as Notification)?.Close();
+                    if (notification.IsClosing)
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        onClick?.Invoke();
+                    }
+                    finally
+                    {
+                        _ = notification.CloseAsync(NotificationCloseReason.User);
+                    }
                 };
             }
 
-            notification.NotificationClosed += (sender, args) => onClose?.Invoke();
-            notification.NotificationClosed += OnNotificationClosed;
-
-            if (!IsLoaded)
+            var notificationContainer = new NotificationContainer(notification)
             {
-                return;
-            }
+                Margin = NotificationMargin,
+                HorizontalAlignment = GetAlignmentForPosition(),
+            };
 
-            var ownerWindow = Window.GetWindow(this);
-            var x = PresentationSource.FromVisual(ownerWindow);
-            if (x == null)
-            {
-                return;
-            }
-
-            lock (_items)
-            {
-                var notificationContainer = new NotificationContainer(notification) { Margin = this.NotificationMargin };
-                notificationContainer.HorizontalAlignment = GetAlignmentForPosition();
-
-                _items.Add(notificationContainer);
-
-                RemoveOverflowNotification();
-            }
-
+            _items.Add(notificationContainer);
+            RemoveOverflowNotification();
+            ItemsChanged?.Invoke(this, EventArgs.Empty);
             notification.ScheduleClose(expirationTime);
+            return notification;
         }
 
         private HorizontalAlignment GetAlignmentForPosition()
         {
-            if (Position == NotificationPosition.TopLeft ||
-                                Position == NotificationPosition.BottomLeft ||
-                               Position == NotificationPosition.TopLeft)
+            switch (Position)
             {
-                return HorizontalAlignment.Left;
-            }
-            else
-            {
-                return HorizontalAlignment.Right;
+                case NotificationPosition.TopLeft:
+                case NotificationPosition.BottomLeft:
+                case NotificationPosition.CenterLeft:
+                    return HorizontalAlignment.Left;
+
+                case NotificationPosition.TopCenter:
+                case NotificationPosition.BottomCenter:
+                case NotificationPosition.Center:
+                    return HorizontalAlignment.Center;
+
+                default:
+                    return HorizontalAlignment.Right;
             }
         }
 
         private static Notification CreateNotification(object content)
         {
-            if (!(content is Notification notification))
+            if (content is Notification notification)
             {
-                notification = new Notification()
-                {
-                    Content = content
-                };
-                if (!(content is UIElement))
-                {
-                    notification.Width = NotificationConstants.NotificationWidth;
-                }
+                return notification;
             }
+
+            notification = new Notification { Content = content };
+            if (content is not UIElement)
+            {
+                notification.Width = NotificationConstants.NotificationWidth;
+            }
+
             return notification;
         }
 
         private void OnNotificationClosed(object sender, RoutedEventArgs routedEventArgs)
         {
-            var notification = sender as Notification;
-            _items.Remove(notification?.Parent);
+            if (_items != null && sender is Notification notification && notification.Parent is NotificationContainer container)
+            {
+                _items.Remove(container);
+                ItemsChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void RemoveOverflowNotification()
         {
-            if (AllowRemovingPermanentOnOverflow)
+            if (_items is null)
             {
-                if (_items.OfType<NotificationContainer>().Count(i => !i.IsClosing) > MaxItems)
-                {
-                    _items.OfType<NotificationContainer>().First(i => !i.IsClosing).Notification.Close();
-                };
+                return;
             }
-            else
-            {
-                var removableNotifications = _items.OfType<NotificationContainer>().Where(n => !n.IsPermanent && !n.IsClosing);
 
-                if (removableNotifications.Count() > MaxItems)
-                {
-                    removableNotifications.First().Notification.Close();
-                };
+            var activeNotifications = _items
+                .OfType<NotificationContainer>()
+                .Where(item => !item.IsClosing)
+                .ToArray();
+
+            if ((ulong)activeNotifications.Length <= MaxItems)
+            {
+                return;
             }
+
+            var notificationToRemove = AllowRemovingPermanentOnOverflow
+                ? activeNotifications.FirstOrDefault()
+                : activeNotifications.FirstOrDefault(item => !item.IsPermanent);
+
+            if (notificationToRemove != null)
+            {
+                _ = notificationToRemove.Notification.CloseAsync(NotificationCloseReason.Overflow);
+            }
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            NotificationAreaRegistry.Register(this);
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            NotificationAreaRegistry.Unregister(this);
         }
     }
 }

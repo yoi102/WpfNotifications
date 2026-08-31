@@ -22,18 +22,25 @@ namespace Notifications.Mvvm.Sample
         /// </summary>
         public new static App Current => (App)Application.Current;
 
-        public IServiceProvider Services { get; }
+        public ServiceProvider Services { get; }
 
         /// <summary>
         /// Configures the services for the application.
         /// </summary>
-        private static IServiceProvider ConfigureServices()
+        private static ServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-            services.AddSingleton<INotificationManager, NotificationManager>();
+            services.AddSingleton<IAsyncNotificationManager, NotificationManager>();
             services.AddTransient<INotificationService, NotificationService>();
             services.AddTransient<MainViewModel>();
             return services.BuildServiceProvider();
+        }
+
+        /// <inheritdoc />
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Services.Dispose();
+            base.OnExit(e);
         }
     }
 }

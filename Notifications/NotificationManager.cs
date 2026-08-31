@@ -1,125 +1,361 @@
-﻿using Notifications.Controls;
+using Notifications.Constants;
+using Notifications.Controls;
+using Notifications.Enums;
+using Notifications.Exceptions;
+using Notifications.Internal;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace Notifications
 {
-    public class NotificationManager : INotificationManager
+    /// <summary>Displays and manages application-area and desktop-overlay notifications.</summary>
+    public class NotificationManager : IAsyncNotificationManager, IDisposable
     {
-        private static readonly List<NotificationArea> _areas = new List<NotificationArea>();
-#if NETFRAMEWORK
-        private static NotificationsOverlayWindow _window;
-
-#else
-        private static NotificationsOverlayWindow? _window;
-#endif
         private readonly Dispatcher _dispatcher;
+        private readonly NotificationManagerOptions _options;
+        private readonly NotificationOverlayHost _overlayHost;
+        private readonly NotificationStore _notifications = new NotificationStore();
+        private int _disposed;
 
-#if NETFRAMEWORK
-        public NotificationManager(Dispatcher dispatcher = null)
-
-#else
+        /// <summary>Initializes a manager using legacy process-wide defaults.</summary>
         public NotificationManager(Dispatcher? dispatcher = null)
-#endif
+            : this(NotificationManagerOptions.FromLegacyDefaults(), dispatcher)
         {
-            if (dispatcher is null)
-            {
-                dispatcher = Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
-            }
-            _dispatcher = dispatcher;
         }
 
+        /// <summary>Initializes a manager using an immutable snapshot of the supplied options.</summary>
+        public NotificationManager(NotificationManagerOptions options, Dispatcher? dispatcher = null)
+        {
+            _options = (options ?? throw new ArgumentNullException(nameof(options))).Clone();
+            _dispatcher = dispatcher ?? Application.Current?.Dispatcher ?? Dispatcher.CurrentDispatcher;
+            _overlayHost = new NotificationOverlayHost(_options.Overlay);
+            NotificationConstants.ApplyConfiguredApplicationResources();
+        }
+
+        /// <summary>Raised when a background legacy <see cref="Show"/> or <see cref="Clear"/> operation fails.</summary>
+        public event EventHandler<NotificationManagerErrorEventArgs>? Error;
+
+        /// <summary>Clears overlay notifications or notifications in the named application area.</summary>
         public void Clear(string areaIdentifier = "")
         {
-            if (areaIdentifier == string.Empty && _window != null)
+            ThrowIfDisposed();
+            if (areaIdentifier is null)
             {
-                _window.Clear();
-            }
-            else
-            {
-                foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier))
-                {
-                    area.Clear();
-                }
-            }
-        }
-
-#if NETFRAMEWORK
-
-        public void Show(object content,
-                               string areaIdentifier = "",
-                               bool closeOnClick = true,
-                               TimeSpan? expirationTime = null,
-                               Action onClick = null,
-                               Action onClose = null)
-
-#else
-        public void Show(object content,
-                               string areaIdentifier = "",
-                               bool closeOnClick = true,
-                               TimeSpan? expirationTime = null,
-                               Action? onClick = null,
-                               Action? onClose = null)
-
-#endif
-        {
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content));
+                throw new ArgumentNullException(nameof(areaIdentifier));
             }
 
             if (!_dispatcher.CheckAccess())
             {
-                _dispatcher.BeginInvoke(new Action(
-                    () => Show(content, areaIdentifier, closeOnClick, expirationTime, onClick, onClose)));
+                DispatchLegacy(NotificationManagerOperation.Clear, () => ClearCore(areaIdentifier));
                 return;
             }
 
-            if (expirationTime == null) expirationTime = TimeSpan.FromSeconds(5);
+            ClearCore(areaIdentifier);
+        }
 
-            if (areaIdentifier == string.Empty && _window == null)
+        /// <summary>Clears a target and completes after its closing animations finish.</summary>
+        public Task ClearAsync(NotificationTarget target, CancellationToken cancellationToken = default)
+        {
+            ThrowIfDisposed();
+            if (target is null)
             {
-                var workArea = SystemParameters.WorkArea;
-
-                _window = new NotificationsOverlayWindow
-                {
-                    Left = workArea.Left,
-                    Top = workArea.Top,
-                    Width = workArea.Width,
-                    Height = workArea.Height,
-                };
-                _window.Closed += (sender, args) =>
-                {
-                    _window = null;
-                };
+                throw new ArgumentNullException(nameof(target));
             }
 
-            if (_areas != null && _window != null)
-                _window.Show();
+            cancellationToken.ThrowIfCancellationRequested();
+            return _dispatcher.CheckAccess()
+                ? ClearCoreAsync(target, true)
+                : ClearOnDispatcherAsync(target, cancellationToken);
+        }
 
-            if (_areas == null) return;
-
-            foreach (var area in _areas.Where(a => a.Identifier == areaIdentifier).ToArray())
+        /// <summary>Displays a notification through the source-compatible legacy API.</summary>
+        public void Show(object content, string areaIdentifier = "", bool closeOnClick = true, TimeSpan? expirationTime = null, Action? onClick = null, Action? onClose = null)
+        {
+            ThrowIfDisposed();
+            ValidateContent(content);
+            if (areaIdentifier is null)
             {
-                area.Show(content, closeOnClick, (TimeSpan)expirationTime, onClick, onClose);
+                throw new ArgumentNullException(nameof(areaIdentifier));
+            }
+
+            var effectiveExpirationTime = expirationTime ?? _options.DefaultExpirationTime;
+            Notification.ValidateExpirationTime(effectiveExpirationTime, nameof(expirationTime));
+            var request = new NotificationRequest(content)
+            {
+                Target = areaIdentifier.Length == 0 ? NotificationTarget.Overlay() : NotificationTarget.Area(areaIdentifier),
+                CloseOnClick = closeOnClick,
+                ExpirationTime = effectiveExpirationTime,
+                OnClick = onClick,
+                OnClose = onClose,
+            };
+
+            if (!_dispatcher.CheckAccess())
+            {
+                DispatchLegacy(NotificationManagerOperation.Show, () => ShowCore(request, false));
+                return;
+            }
+
+            _ = ShowCore(request, false);
+        }
+
+        /// <summary>Displays a request and returns a handle for the individual notification.</summary>
+        public Task<INotificationHandle> ShowAsync(NotificationRequest request, CancellationToken cancellationToken = default)
+        {
+            ThrowIfDisposed();
+            ValidateRequest(request);
+            cancellationToken.ThrowIfCancellationRequested();
+            return _dispatcher.CheckAccess()
+                ? Task.FromResult<INotificationHandle>(ShowCore(request, true))
+                : ShowOnDispatcherAsync(request, cancellationToken);
+        }
+
+        /// <summary>Releases overlay windows and closes notifications created by this manager.</summary>
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            if (_dispatcher.CheckAccess())
+            {
+                DisposeCore();
+            }
+            else if (!_dispatcher.HasShutdownStarted && !_dispatcher.HasShutdownFinished)
+            {
+                _dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        DisposeCore();
+                    }
+                    catch (Exception exception)
+                    {
+                        ReportError(NotificationManagerOperation.Dispose, exception);
+                    }
+                }));
+            }
+
+            GC.SuppressFinalize(this);
+        }
+
+        private void ClearCore(string areaIdentifier)
+        {
+            if (areaIdentifier.Length == 0)
+            {
+                _overlayHost.ClearAll();
+                return;
+            }
+
+            foreach (var area in NotificationAreaRegistry.Find(_dispatcher, areaIdentifier))
+            {
+                area.Clear();
             }
         }
 
-        internal static void AddArea(NotificationArea area)
+        private async Task<INotificationHandle> ShowOnDispatcherAsync(NotificationRequest request, CancellationToken cancellationToken)
         {
-            _areas.Add(area);
-            area.Unloaded += Area_Unloaded;
+            return await _dispatcher.InvokeAsync(
+                () => (INotificationHandle)ShowCore(request, true),
+                DispatcherPriority.Normal,
+                cancellationToken).Task;
         }
 
-        private static void Area_Unloaded(object sender, RoutedEventArgs e)
+        private NotificationHandle ShowCore(NotificationRequest request, bool requireTarget)
         {
-            if (sender is NotificationArea area)
+            ThrowIfDisposed();
+            ValidateRequest(request);
+            var expirationTime = request.ExpirationTime ?? _options.DefaultExpirationTime;
+            Notification.ValidateExpirationTime(expirationTime, nameof(request.ExpirationTime));
+            var displayOptions = NotificationDisplayOptions.FromManager(_options, request);
+
+            var existing = _notifications.FindByTag(request.Tag);
+            if (existing != null)
             {
-                area.Unloaded -= Area_Unloaded; 
-                _areas.Remove(area);
+                switch (request.DuplicateBehavior)
+                {
+                    case NotificationDuplicateBehavior.Ignore:
+                        return existing;
+                    case NotificationDuplicateBehavior.UpdateExisting:
+                        existing.Update(request.Content, expirationTime);
+                        return existing;
+                    case NotificationDuplicateBehavior.Replace:
+                        existing.Close(NotificationCloseReason.Replaced);
+                        break;
+                }
+            }
+
+            Notification? notification;
+            if (request.Target.IsOverlay)
+            {
+                var window = _overlayHost.GetOrCreate(request.Target);
+                if (!window.IsVisible)
+                {
+                    window.Show();
+                }
+
+                notification = window.ShowNotification(
+                    request.Content,
+                    request.CloseOnClick,
+                    expirationTime,
+                    request.OnClick,
+                    request.OnClose,
+                    displayOptions);
+            }
+            else
+            {
+                var identifier = request.Target.AreaIdentifier!;
+                var area = GetSingleArea(identifier, requireTarget);
+                if (area is null)
+                {
+                    return NotificationHandle.CreateCompleted();
+                }
+
+                notification = area.ShowManaged(
+                    request.Content,
+                    request.CloseOnClick,
+                    expirationTime,
+                    request.OnClick,
+                    request.OnClose,
+                    displayOptions);
+            }
+
+            if (notification is null)
+            {
+                if (requireTarget)
+                {
+                    throw new NotificationAreaNotFoundException(request.Target.AreaIdentifier ?? string.Empty);
+                }
+
+                return NotificationHandle.CreateCompleted();
+            }
+
+            var handle = new NotificationHandle(notification);
+            _notifications.Add(handle, request.Tag);
+            return handle;
+        }
+
+        private async Task ClearOnDispatcherAsync(NotificationTarget target, CancellationToken cancellationToken)
+        {
+            var clearTask = await _dispatcher.InvokeAsync(
+                () => ClearCoreAsync(target, true),
+                DispatcherPriority.Normal,
+                cancellationToken).Task;
+            await clearTask;
+        }
+
+        private Task ClearCoreAsync(NotificationTarget target, bool requireTarget)
+        {
+            ThrowIfDisposed();
+            if (target.IsOverlay)
+            {
+                return _overlayHost.ClearAsync(target);
+            }
+
+            var area = GetSingleArea(target.AreaIdentifier!, requireTarget);
+            return area?.ClearAsync(NotificationCloseReason.Cleared) ?? Task.CompletedTask;
+        }
+
+        private NotificationArea? GetSingleArea(string identifier, bool required)
+        {
+            var areas = NotificationAreaRegistry.Find(_dispatcher, identifier);
+            if (areas.Length == 0)
+            {
+                if (required)
+                {
+                    throw new NotificationAreaNotFoundException(identifier);
+                }
+
+                return null;
+            }
+
+            if (areas.Length > 1)
+            {
+                throw new DuplicateNotificationAreaException(identifier);
+            }
+
+            return areas[0];
+        }
+
+        private void ValidateContent(object content)
+        {
+            if (content is null)
+            {
+                throw new ArgumentNullException(nameof(content));
+            }
+
+            if (content is DispatcherObject dispatcherObject && dispatcherObject.Dispatcher != _dispatcher)
+            {
+                throw new InvalidOperationException("Notification UI content must belong to the notification manager's Dispatcher.");
+            }
+        }
+
+        private void ValidateRequest(NotificationRequest request)
+        {
+            if (request is null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            ValidateContent(request.Content);
+            if (request.Target is null)
+            {
+                throw new ArgumentException("A notification target is required.", nameof(request));
+            }
+
+            if (request.Target.Owner != null && request.Target.Owner.Dispatcher != _dispatcher)
+            {
+                throw new InvalidOperationException("The owner window must belong to the notification manager's Dispatcher.");
+            }
+
+            if (request.Tag != null && string.IsNullOrWhiteSpace(request.Tag))
+            {
+                throw new ArgumentException("A notification tag cannot be empty or whitespace.", nameof(request));
+            }
+
+            if (!Enum.IsDefined(typeof(NotificationDuplicateBehavior), request.DuplicateBehavior))
+            {
+                throw new ArgumentOutOfRangeException(nameof(request), request.DuplicateBehavior, "Unknown duplicate behavior.");
+            }
+        }
+
+        private void DispatchLegacy(NotificationManagerOperation operation, Action action)
+        {
+            _dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception exception)
+                {
+                    ReportError(operation, exception);
+                }
+            }));
+        }
+
+        private void DisposeCore()
+        {
+            _notifications.CloseAll(NotificationCloseReason.ManagerDisposed);
+            _overlayHost.CloseAll();
+        }
+
+        private void ReportError(NotificationManagerOperation operation, Exception exception)
+        {
+            Trace.TraceError($"Notification manager {operation} failed: {exception}");
+            Error?.Invoke(this, new NotificationManagerErrorEventArgs(operation, exception));
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (Volatile.Read(ref _disposed) != 0)
+            {
+                throw new ObjectDisposedException(nameof(NotificationManager));
             }
         }
     }

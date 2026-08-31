@@ -16,7 +16,7 @@
                   d:DesignWidth="300"
                   mc:Ignorable="d">
     <ntf:Notification.Triggers>
-        <EventTrigger RoutedEvent="ntf:Notification.NotificationClosing">
+        <EventTrigger RoutedEvent="ntf:Notification.ExpirationScheduled">
             <BeginStoryboard>
                 <Storyboard>
                     <DoubleAnimation Storyboard.TargetName="colorBar"

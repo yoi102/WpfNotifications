@@ -10,17 +10,21 @@
         xmlns:ntf="https://github.com/notifications/xaml/controls"
         d:DataContext="{d:DesignInstance Type=viewmodel:MainViewModel}"
         Style="{StaticResource MaterialDesignWindow}"
-        Width="1500"
-        Height="1000"
+        Width="1100"
+        Height="720"
+        MinWidth="820"
+        MinHeight="560"
         mc:Ignorable="d"
-        Title="MainWindow">
+        Title="WpfNotifications MVVM 示例">
     <Grid>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <GroupBox Header="ShowCases">
+            <GroupBox Margin="12"
+                      Header="通知预览">
                 <Grid>
 
                     <md:DialogHost x:Name="DialogHost"
@@ -44,12 +48,13 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <GroupBox Header="Option">
+                <GroupBox Margin="12,0,6,0"
+                          Header="显示选项">
                     <StackPanel>
 
                         <CheckBox x:Name="isInWindow"
                                   Margin="20,20,0,0"
-                                  Content="InWindow"
+                                  Content="显示在当前窗口（取消后使用桌面 Overlay）"
                                   IsChecked="{Binding InWindow}" />
                         <ComboBox Name="comb"
                                   Width="200"
@@ -60,36 +65,73 @@
                         </ComboBox>
                         <CheckBox x:Name="AllowRemovingPermanentOnOverflow"
                                   Margin="20,10,0,0"
-                                  Content="AllowRemovingPermanentOnOverflow"
+                                  Content="溢出时允许移除永久通知"
                                   IsChecked="True" />
                         <CheckBox x:Name="ReverseOrder"
                                   Margin="20,10,0,0"
-                                  Content="ReverseOrder"
+                                  Content="反向排列"
                                   IsChecked="True" />
+                        <CheckBox Margin="20,10,0,0"
+                                  Content="显示关闭按钮"
+                                  IsChecked="{Binding ShowCloseButton}" />
+                        <CheckBox Margin="20,10,0,20"
+                                  Content="显示倒计时条"
+                                  IsChecked="{Binding ShowCountdownBar}" />
                     </StackPanel>
                 </GroupBox>
 
-                <UniformGrid Grid.Column="1">
+                <UniformGrid Grid.Column="1"
+                             Margin="6,0,12,0">
                     <Button Margin="2"
-                            Content="CustomNotification1"
+                            Content="永久自定义通知"
                             Command="{Binding CustomNotification1Command}" />
                     <Button Margin="2"
-                            Content="CustomNotification2"
+                            Content="自定义倒计时通知"
                             Command="{Binding CustomNotification2Command}" />
                     <Button Margin="2"
-                            Content="UserControlMessage"
+                            Content="UserControl 内容"
                             Command="{Binding UserControlMessageCommand}" />
                     <Button Margin="2"
-                            Content="DefaultMessageWithTitle"
+                            Content="标题与类型消息"
                             Command="{Binding DefaultMessageWithTitleCommand}" />
                     <Button Margin="2"
-                            Content="DefaultMessage"
+                            Content="普通消息"
                             Command="{Binding DefaultMessageCommand}" />
                     <Button Margin="2"
-                            Content="Clear"
+                            Content="清除当前目标"
                             Command="{Binding ClearCommand}" />
                 </UniformGrid>
             </Grid>
+            <Border Grid.Row="2"
+                    Margin="12"
+                    Padding="10"
+                    Background="White"
+                    BorderBrush="#FFD1D5DB"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                <TextBlock AutomationProperties.LiveSetting="Polite"
+                           Text="{Binding StatusMessage}"
+                           TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground"
+                                    Value="#FF374151" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasCompletedOperation}"
+                                             Value="True">
+                                    <Setter Property="Foreground"
+                                            Value="#FF146C43" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding HasError}"
+                                             Value="True">
+                                    <Setter Property="Foreground"
+                                            Value="#FFB42318" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
         </Grid>
     </Grid>
 </Window>

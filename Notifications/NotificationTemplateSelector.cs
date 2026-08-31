@@ -4,16 +4,13 @@ using System.Windows.Controls;
 
 namespace Notifications
 {
+    /// <summary>Selects built-in templates for strings and <see cref="NotificationContent"/> values.</summary>
     public class NotificationTemplateSelector : DataTemplateSelector
     {
-#if NETFRAMEWORK
-        private DataTemplate _defaultNotificationTemplate;
-        private DataTemplate _defaultStringTemplate;
-#else
         private DataTemplate? _defaultNotificationTemplate;
         private DataTemplate? _defaultStringTemplate;
-#endif
 
+        /// <inheritdoc />
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
             if (_defaultStringTemplate == null && _defaultNotificationTemplate == null)
@@ -39,7 +36,7 @@ namespace Notifications
                 return _defaultNotificationTemplate;
             }
 
-            return base.SelectTemplate(item, container);
+            return base.SelectTemplate(item, container)!;
         }
 
         private void GetTemplatesFromResources(FrameworkElement container)

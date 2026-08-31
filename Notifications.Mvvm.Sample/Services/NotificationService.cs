@@ -1,91 +1,161 @@
-﻿using Notifications.Enums;
-using Notifications.Extensions;
+using Notifications.Enums;
 using Notifications.Mvvm.Sample.Interfaces;
 using Notifications.Mvvm.Sample.Messages;
 
 namespace Notifications.Mvvm.Sample.Services
 {
-    internal class NotificationService : INotificationService
+    internal sealed class NotificationService : INotificationService
     {
-        private readonly INotificationManager notificationManager;
+        private readonly IAsyncNotificationManager _notificationManager;
 
-        public NotificationService(INotificationManager notificationManager)
+        public NotificationService(IAsyncNotificationManager notificationManager)
         {
-            this.notificationManager = notificationManager;
+            _notificationManager = notificationManager;
         }
 
-        public void Clear(string areaIdentifier = "")
+        public Task ClearAsync(string areaIdentifier = "")
         {
-            notificationManager.Clear(areaIdentifier);
+            return _notificationManager.ClearAsync(ToTarget(areaIdentifier));
         }
 
-        public void ShowCustomNotification1(string areaIdentifier = "",
-                                             bool closeOnClick = true,
-                                             TimeSpan? expirationTime = null,
-                                             Action? onClick = null,
-                                             Action? onClose = null)
+        public Task ShowCustomNotification1Async(
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null)
         {
-            CustomNotification1 customNotification1 = new();
-
-            notificationManager.Show(customNotification1, areaIdentifier, closeOnClick, expirationTime, onClick, onClose);
+            return ShowAsync(
+                new CustomNotification1(),
+                areaIdentifier,
+                closeOnClick,
+                expirationTime,
+                onClick,
+                onClose,
+                showCloseButton,
+                showCountdownBar);
         }
 
-        public void ShowCustomNotification2(string areaIdentifier = "",
-                                             bool closeOnClick = true,
-                                             TimeSpan? expirationTime = null,
-                                             Action? onClick = null,
-                                             Action? onClose = null)
+        public Task ShowCustomNotification2Async(
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null)
         {
-            CustomNotification2 customNotification2 = new();
-
-            notificationManager.Show(customNotification2, areaIdentifier, closeOnClick, expirationTime, onClick, onClose);
+            return ShowAsync(
+                new CustomNotification2(),
+                areaIdentifier,
+                closeOnClick,
+                expirationTime,
+                onClick,
+                onClose,
+                showCloseButton,
+                showCountdownBar);
         }
 
-        public void ShowDefaultMessage(string title,
-                                    string message,
-                                    NotificationType notificationType,
-                                    string areaIdentifier = "",
-                                    bool closeOnClick = true,
-                                    TimeSpan? expirationTime = null,
-                                    Action? onClick = null,
-                                    Action? onClose = null)
+        public Task ShowDefaultMessageAsync(
+            string title,
+            string message,
+            NotificationType notificationType,
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null)
         {
-            notificationManager.Show(title,
-                                     message,
-                                     notificationType,
-                                     areaIdentifier,
-                                     closeOnClick,
-                                     expirationTime,
-                                     onClick,
-                                     onClose);
+            return ShowAsync(
+                new NotificationContent
+                {
+                    Title = title,
+                    Message = message,
+                    Type = notificationType,
+                },
+                areaIdentifier,
+                closeOnClick,
+                expirationTime,
+                onClick,
+                onClose,
+                showCloseButton,
+                showCountdownBar);
         }
 
-        public void ShowDefaultMessage(string message,
-                               string areaIdentifier = "",
-                               bool closeOnClick = true,
-                               TimeSpan? expirationTime = null,
-                               Action? onClick = null,
-                               Action? onClose = null)
+        public Task ShowDefaultMessageAsync(
+            string message,
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null)
         {
-            notificationManager.Show(message,
-                                    areaIdentifier,
-                                    closeOnClick,
-                                    expirationTime,
-                                    onClick,
-                                    onClose);
+            return ShowAsync(
+                message,
+                areaIdentifier,
+                closeOnClick,
+                expirationTime,
+                onClick,
+                onClose,
+                showCloseButton,
+                showCountdownBar);
         }
 
-        public void ShowUserControlMessage(string string1,
-                                                                                   string string2,
-                                           string areaIdentifier = "",
-                                           bool closeOnClick = true,
-                                           TimeSpan? expirationTime = null,
-                                           Action? onClick = null,
-                                           Action? onClose = null)
+        public Task ShowUserControlMessageAsync(
+            string string1,
+            string string2,
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null)
         {
-            UserControlMessage userControlMessage = new(string1, string2);
+            return ShowAsync(
+                new UserControlMessage(string1, string2),
+                areaIdentifier,
+                closeOnClick,
+                expirationTime,
+                onClick,
+                onClose,
+                showCloseButton,
+                showCountdownBar);
+        }
 
-            notificationManager.Show(userControlMessage, areaIdentifier, closeOnClick, expirationTime, onClick, onClose);
+        private Task<INotificationHandle> ShowAsync(
+            object content,
+            string areaIdentifier,
+            bool closeOnClick,
+            TimeSpan? expirationTime,
+            Action? onClick,
+            Action? onClose,
+            bool? showCloseButton,
+            bool? showCountdownBar)
+        {
+            return _notificationManager.ShowAsync(new NotificationRequest(content)
+            {
+                Target = ToTarget(areaIdentifier),
+                CloseOnClick = closeOnClick,
+                ExpirationTime = expirationTime,
+                OnClick = onClick,
+                OnClose = onClose,
+                ShowCloseButton = showCloseButton,
+                ShowCountdownBar = showCountdownBar,
+            });
+        }
+
+        private static NotificationTarget ToTarget(string areaIdentifier)
+        {
+            return string.IsNullOrEmpty(areaIdentifier)
+                ? NotificationTarget.Overlay()
+                : NotificationTarget.Area(areaIdentifier);
         }
     }
 }

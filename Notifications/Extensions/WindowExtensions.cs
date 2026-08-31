@@ -13,6 +13,8 @@ namespace Notifications.Extensions
             // ...
             WS_EX_TOOLWINDOW = 0x00000080,
 
+            WS_EX_NOACTIVATE = 0x08000000,
+
             // ...
         }
 

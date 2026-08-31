@@ -1,45 +1,60 @@
-﻿using Notifications.Enums;
+using Notifications.Enums;
 
 namespace Notifications.Mvvm.Sample.Interfaces
 {
     internal interface INotificationService
     {
-        void Clear(string areaIdentifier = "");
+        Task ClearAsync(string areaIdentifier = "");
 
-        void ShowCustomNotification1(string areaIdentifier = "",
-                                                    bool closeOnClick = true,
-                                            TimeSpan? expirationTime = null,
-                                            Action? onClick = null,
-                                            Action? onClose = null);
+        Task ShowCustomNotification1Async(
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null);
 
-        void ShowCustomNotification2(string areaIdentifier = "",
-                                            bool closeOnClick = true,
-                                            TimeSpan? expirationTime = null,
-                                            Action? onClick = null,
-                                            Action? onClose = null);
+        Task ShowCustomNotification2Async(
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null);
 
-        void ShowDefaultMessage(string title,
-                                string message,
-                                NotificationType notificationType,
-                                string areaIdentifier = "",
-                                bool closeOnClick = true,
-                                TimeSpan? expirationTime = null,
-                                Action? onClick = null,
-                                Action? onClose = null);
+        Task ShowDefaultMessageAsync(
+            string title,
+            string message,
+            NotificationType notificationType,
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null);
 
-        void ShowDefaultMessage(string message,
-                                string areaIdentifier = "",
-                                bool closeOnClick = true,
-                                TimeSpan? expirationTime = null,
-                                Action? onClick = null,
-                                Action? onClose = null);
+        Task ShowDefaultMessageAsync(
+            string message,
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null);
 
-        void ShowUserControlMessage(string string1,
-                                    string string2,
-                                    string areaIdentifier = "",
-                                    bool closeOnClick = true,
-                                    TimeSpan? expirationTime = null,
-                                    Action? onClick = null,
-                                    Action? onClose = null);
+        Task ShowUserControlMessageAsync(
+            string string1,
+            string string2,
+            string areaIdentifier = "",
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null,
+            Action? onClick = null,
+            Action? onClose = null,
+            bool? showCloseButton = null,
+            bool? showCountdownBar = null);
     }
 }

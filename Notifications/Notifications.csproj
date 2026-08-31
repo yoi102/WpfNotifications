@@ -1,47 +1,53 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0-windows;net8.0-windows;net7.0-windows;net6.0-windows;net4.7-windows;net4.8-windows</TargetFrameworks>
+    <TargetFrameworks>net10.0-windows;net9.0-windows;net8.0-windows;net7.0-windows;net6.0-windows;net4.7-windows;net4.8-windows</TargetFrameworks>
     <UseWPF>true</UseWPF>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-    <Title>WPF toast notifications.</Title>
+    <Title>WpfNotifications</Title>
     <PackageProjectUrl>https://github.com/yoi102/NotificationsWpf</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/yoi102/NotificationsWpf</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <Configurations>Debug;Release;Publish</Configurations>
-    <Description>WPF toast notifications.</Description>
+    <Description>Accessible, themeable WPF in-app and multi-monitor overlay notifications with async lifecycle handles.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>WPF toast notifications;Notifications</PackageTags>
+    <PackageTags>wpf;toast;notifications;desktop;overlay;accessible</PackageTags>
     <Company>https://github.com/yoi102</Company>
     <PackageId>WpfNotifications</PackageId>
     <Authors>yoiri</Authors>
     <PackageIcon>icon.png</PackageIcon>
     <SignAssembly>False</SignAssembly>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <Version>1.0.0.1</Version>
+    <Version>1.1.0</Version>
+    <PackageReleaseNotes>Adds async handles, target-explicit APIs, per-notification close-button and countdown-bar controls, compact multi-monitor overlays, accessibility defaults, deduplication, disposal, automatic themes, and cross-framework tests.</PackageReleaseNotes>
   </PropertyGroup>
     
   <ItemGroup>
     <None Include="..\icon.png">
       <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
+      <PackagePath>/</PackagePath>
     </None>
     <None Include="..\LICENSE">
       <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
+      <PackagePath>/</PackagePath>
     </None>
     <None Include="..\README.md">
       <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
+      <PackagePath>/</PackagePath>
     </None>
   </ItemGroup>
 

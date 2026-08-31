@@ -5,18 +5,22 @@
         xmlns:enum="clr-namespace:Notifications.Enums;assembly=Notifications"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ntf="https://github.com/notifications/xaml/controls"
-        Title="MainWindow"
-        Width="1500"
-        Height="1000"
-        Background="Gray"
+        Title="WpfNotifications 示例"
+        Width="1100"
+        Height="720"
+        MinWidth="820"
+        MinHeight="560"
+        Background="#FFF3F4F6"
         mc:Ignorable="d"
         >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <GroupBox Header="ShowCases">
+        <GroupBox Margin="12"
+                  Header="通知预览">
 
             <ntf:NotificationArea x:Name="notificationArea"
                                   Panel.ZIndex="9999"
@@ -33,12 +37,13 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <GroupBox Header="Option">
+            <GroupBox Margin="12,0,6,0"
+                      Header="显示选项">
                 <StackPanel>
 
                     <CheckBox x:Name="isInWindow"
                               Margin="20,20,0,0"
-                              Content="InWindow"
+                              Content="显示在当前窗口（取消后使用桌面 Overlay）"
                               IsChecked="True"
                               />
                     <ComboBox Name="comb"
@@ -60,46 +65,69 @@
                     </ComboBox>
                     <CheckBox x:Name="AllowRemovingPermanentOnOverflow"
                               Margin="20,10,0,0"
-                              Content="AllowRemovingPermanentOnOverflow"
+                              Content="溢出时允许移除永久通知"
                               IsChecked="True"
                               />
                     <CheckBox x:Name="ReverseOrder"
                               Margin="20,10,0,0"
-                              Content="ReverseOrder"
+                              Content="反向排列"
                               IsChecked="True"
                               />
+                    <CheckBox x:Name="showCloseButton"
+                              Margin="20,10,0,0"
+                              Content="显示关闭按钮"
+                              IsChecked="True" />
+                    <CheckBox x:Name="showCountdownBar"
+                              Margin="20,10,0,20"
+                              Content="显示倒计时条"
+                              IsChecked="True" />
 
                 </StackPanel>
             </GroupBox>
 
-            <UniformGrid Grid.Column="1">
+            <UniformGrid Grid.Column="1"
+                         Margin="6,0,12,0">
                 <Button Margin="2"
                         Click="CustomButtonClick"
-                        Content="Custom"
+                        Content="随机自定义消息"
                         />
                 <Button Margin="2"
                         Click="MessageButtonClick"
-                        Content="Message"
+                        Content="普通消息"
                         />
                 <Button Margin="2"
                         Click="MessageWithTitleButtonClick"
-                        Content="MessageWithTitle"
+                        Content="标题与类型消息"
                         />
                 <Button Margin="2"
                         Click="UserControlMessageButtonClick"
-                        Content="UserControlMessage"
+                        Content="UserControl 内容"
                         />
                 <Button Margin="2"
                         Click="CustomNotificationButtonClick"
-                        Content="CustomNotification"
+                        Content="永久自定义通知"
                         />
                 <Button Margin="2"
                         Click="ClearButtonClick"
-                        Content="Clear"
+                        Content="清除当前目标"
                         />
             </UniformGrid>
 
         </Grid>
+
+        <Border Grid.Row="2"
+                Margin="12"
+                Padding="10"
+                Background="White"
+                BorderBrush="#FFD1D5DB"
+                BorderThickness="1"
+                CornerRadius="4">
+            <TextBlock x:Name="statusText"
+                       AutomationProperties.LiveSetting="Polite"
+                       Foreground="#FF374151"
+                       Text="请选择选项并创建通知；显示开关仅影响之后创建的通知。"
+                       TextWrapping="Wrap" />
+        </Border>
 
     </Grid>
 </Window>

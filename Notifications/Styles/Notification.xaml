@@ -22,6 +22,13 @@
           Fill="White"
           x:Shared="False" />
     <noti:NotificationTemplateSelector x:Key="NotificationTemplateSelector" />
+    <SolidColorBrush x:Key="Notifications.StringNotificationBackground"
+                     Color="#444444" />
+    <SolidColorBrush x:Key="Notifications.DefaultNotificationForeground"
+                     Color="White" />
+    <system:Double x:Key="Notifications.DefaultNotificationFontSize">15</system:Double>
+    <FontWeight x:Key="Notifications.DefaultNotificationFontWeight">Normal</FontWeight>
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
     <ControlTemplate x:Key="NotificationTemplate"
                      TargetType="{x:Type controls:Notification}">
@@ -32,6 +39,7 @@
                         MinHeight="80">
                     <TextBlock HorizontalAlignment="Center"
                                VerticalAlignment="Center"
+                               Margin="32,0"
                                Text="{Binding}" />
                 </Border>
             </DataTemplate>
@@ -53,15 +61,15 @@
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center" />
                         </ContentControl>
-                        <DockPanel Grid.Column="1">
+                        <DockPanel Grid.Column="1"
+                                   Margin="0,0,28,0">
                             <TextBlock DockPanel.Dock="Top"
                                        Text="{Binding Title}"
                                        FontWeight="Medium"
                                        TextTrimming="CharacterEllipsis" />
                             <TextBlock Text="{Binding Message}"
                                        TextWrapping="Wrap"
-                                       Opacity=".8"
-                                       Margin="0,0,12,0" />
+                                       Opacity=".8" />
                         </DockPanel>
                     </Grid>
                 </Border>
@@ -73,7 +81,7 @@
                                 Value="{StaticResource InfoIcon}" />
                         <Setter TargetName="Border"
                                 Property="Background"
-                                Value="CornflowerBlue" />
+                                Value="#2457A6" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Type}"
                                  Value="Success">
@@ -82,7 +90,7 @@
                                 Value="{StaticResource SuccessIcon}" />
                         <Setter TargetName="Border"
                                 Property="Background"
-                                Value="MediumSeaGreen" />
+                                Value="#146C43" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Type}"
                                  Value="Warning">
@@ -91,7 +99,7 @@
                                 Value="{StaticResource WarningIcon}" />
                         <Setter TargetName="Border"
                                 Property="Background"
-                                Value="Orange" />
+                                Value="#7A4A00" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Type}"
                                  Value="Error">
@@ -100,7 +108,7 @@
                                 Value="{StaticResource ErrorIcon}" />
                         <Setter TargetName="Border"
                                 Property="Background"
-                                Value="OrangeRed" />
+                                Value="#B42318" />
                     </DataTrigger>
                 </DataTemplate.Triggers>
             </DataTemplate>
@@ -115,48 +123,30 @@
                        HorizontalAlignment="Left"
                        Fill="{TemplateBinding CountdownBarFill}"
                        Height="0"
-                       Width="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth}" />
+                       Width="{Binding RelativeSource={RelativeSource AncestorType=Grid}, Path=ActualWidth}"
+                       Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ShowCountdownBar, Converter={StaticResource BooleanToVisibilityConverter}}" />
             <ContentPresenter Grid.Row="1" />
+            <Button x:Name="PART_CloseButton"
+                    Grid.Row="1"
+                    Width="28"
+                    Height="28"
+                    Margin="0,4,4,0"
+                    Padding="0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    AutomationProperties.Name="{TemplateBinding CloseButtonAutomationName}"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Cursor="Hand"
+                    Foreground="{TemplateBinding Foreground}"
+                    ToolTip="{TemplateBinding CloseButtonAutomationName}"
+                    Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=ShowCloseButton, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <TextBlock Text="&#x00D7;"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           LineHeight="20" />
+            </Button>
         </Grid>
-
-        <ControlTemplate.Triggers>
-            <EventTrigger RoutedEvent="Loaded">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                         From="0"
-                                         To="1"
-                                         Duration="0:0:.5" />
-                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
-                                         From="0"
-                                         To="1"
-                                         Duration="0:0:.2" />
-                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
-                                         From="0"
-                                         To="1"
-                                         Duration="0:0:.2" />
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-            <EventTrigger RoutedEvent="controls:Notification.NotificationCloseInvoked">
-                <BeginStoryboard>
-                    <Storyboard Duration="0:0:.1">
-                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
-                                         From="1"
-                                         To="0.1"
-                                         Duration="0:0:.2" />
-                    </Storyboard>
-                </BeginStoryboard>
-                <BeginStoryboard>
-                    <Storyboard BeginTime="0:0:.2">
-                        <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleY"
-                                         From="1"
-                                         To="0"
-                                         Duration="0:0:.2" />
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-        </ControlTemplate.Triggers>
 
     </ControlTemplate>
 
@@ -166,6 +156,12 @@
                 Value="True" />
         <Setter Property="SnapsToDevicePixels"
                 Value="True" />
+        <Setter Property="Focusable"
+                Value="True" />
+        <Setter Property="KeyboardNavigation.IsTabStop"
+                Value="True" />
+        <Setter Property="ClosingAnimationDuration"
+                Value="0:0:0.4" />
         <Setter Property="LayoutTransform">
             <Setter.Value>
                 <ScaleTransform />
@@ -200,7 +196,7 @@
             </EventTrigger>
             <EventTrigger RoutedEvent="controls:Notification.NotificationCloseInvoked">
                 <BeginStoryboard>
-                    <Storyboard Duration="0:0:.1">
+                    <Storyboard>
                         <DoubleAnimation Storyboard.TargetProperty="LayoutTransform.ScaleX"
                                          From="1"
                                          To="0.1"
@@ -226,12 +222,12 @@
         <Setter Property="ContentTemplateSelector"
                 Value="{StaticResource NotificationTemplateSelector}" />
         <Setter Property="FontWeight"
-                Value="{x:Static constants:NotificationConstants.DefaultNotificationFontWeight}" />
+                Value="{DynamicResource Notifications.DefaultNotificationFontWeight}" />
         <Setter Property="FontSize"
-                Value="{x:Static constants:NotificationConstants.DefaultNotificationFontSize}" />
+                Value="{DynamicResource Notifications.DefaultNotificationFontSize}" />
         <Setter Property="Background"
-                Value="{x:Static constants:NotificationConstants.StringNotificationBackground}" />
+                Value="{DynamicResource Notifications.StringNotificationBackground}" />
         <Setter Property="Foreground"
-                Value="{x:Static constants:NotificationConstants.DefaultNotificationForeground}" />
+                Value="{DynamicResource Notifications.DefaultNotificationForeground}" />
     </Style>
 </ResourceDictionary>

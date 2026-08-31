@@ -1,6 +1,5 @@
-﻿using Notifications.Constants;
+using Notifications.Constants;
 using Notifications.Enums;
-using Notifications.Extensions;
 using Notifications.Sample.Messages;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,115 +7,141 @@ using System.Windows.Media;
 
 namespace Notifications.Sample
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+    /// <summary>Interaction logic for the sample window.</summary>
     public partial class MainWindow : Window
     {
-        private readonly NotificationManager notificationManager;
+        private readonly NotificationManager _notificationManager;
 
         public MainWindow()
         {
-            InitializeComponent();
-
-            notificationManager = new NotificationManager();
-            NotificationConstants.OverlayWindowNotificationPosition = Enums.NotificationPosition.TopRight;
-            NotificationConstants.OverlayWindowMaxCount = 7;
             NotificationConstants.DefaultNotificationForeground = new SolidColorBrush(Colors.MistyRose);
             NotificationConstants.DefaultNotificationFontSize = 18;
             NotificationConstants.NotificationWidth = 300;
             NotificationConstants.DefaultNotificationFontWeight = FontWeights.Bold;
-            NotificationConstants.OverlayWindowAllowRemovingPermanentOnOverflow = false;
-            NotificationConstants.OverlayWindowReverseOrder = true;
+
+            InitializeComponent();
+            _notificationManager = new NotificationManager(new NotificationManagerOptions
+            {
+                Overlay = new NotificationOverlayOptions
+                {
+                    Position = NotificationPosition.TopRight,
+                    MaxItems = 7,
+                    AllowRemovingPermanentOnOverflow = false,
+                    ReverseOrder = true,
+                },
+            });
+            Closed += (_, _) => _notificationManager.Dispose();
         }
 
-        public string NotificationArea
-        {
-            get
-            {
-                if (isInWindow.IsChecked == true)
-                {
-                    return notificationArea.Identifier;
-                }
-                return "";
-            }
-        }
+        private NotificationTarget SelectedTarget => isInWindow.IsChecked == true
+            ? NotificationTarget.Area(notificationArea.Identifier)
+            : NotificationTarget.Overlay();
 
         private static object RandomCustomMessage()
         {
-            object message;
-            Random random = new Random();
-            var type = random.Next(0, 4);
-            switch (type)
+            switch (Random.Shared.Next(0, 4))
             {
                 case 0:
-                    message = new InformationMessage();
-                    break;
-
+                    return new InformationMessage();
                 case 1:
-                    message = new SuccessMessage();
-                    break;
-
+                    return new SuccessMessage();
                 case 2:
-                    message = new WarningMessage();
-                    break;
-
+                    return new WarningMessage();
                 case 3:
-                    message = new ErrorMessage();
-                    break;
-
+                    return new ErrorMessage();
                 default:
                     throw new NotSupportedException();
             }
-
-            return message;
         }
 
-        private void ClearButtonClick(object sender, RoutedEventArgs e)
+        private Task<INotificationHandle> ShowSampleAsync(
+            object content,
+            bool closeOnClick = false,
+            TimeSpan? expirationTime = null)
         {
-            notificationManager.Clear(NotificationArea);
-        }
-
-        private void comb_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            var comboBox = (ComboBox)sender;
-            if (notificationArea == null)
+            return _notificationManager.ShowAsync(new NotificationRequest(content)
             {
-                return;
+                Target = SelectedTarget,
+                CloseOnClick = closeOnClick,
+                ExpirationTime = expirationTime,
+                ShowCloseButton = showCloseButton.IsChecked == true,
+                ShowCountdownBar = showCountdownBar.IsChecked == true,
+            });
+        }
+
+        private async Task ExecuteAsync(Func<Task> operation, string successMessage)
+        {
+            try
+            {
+                await operation();
+                statusText.Foreground = new SolidColorBrush(Color.FromRgb(20, 108, 67));
+                statusText.Text = successMessage;
             }
-            notificationArea.Position = (NotificationPosition)comboBox.SelectedIndex;
+            catch (Exception exception)
+            {
+                statusText.Foreground = new SolidColorBrush(Color.FromRgb(180, 35, 24));
+                statusText.Text = $"操作失败：{exception.Message}";
+            }
         }
 
-        private void CustomButtonClick(object sender, RoutedEventArgs e)
+        private string CurrentSelectionSummary =>
+            $"已显示到{(isInWindow.IsChecked == true ? "窗口区域" : "桌面 Overlay")}；" +
+            $"关闭按钮：{(showCloseButton.IsChecked == true ? "显示" : "隐藏")}；" +
+            $"倒计时条：{(showCountdownBar.IsChecked == true ? "显示" : "隐藏")}。";
+
+        private async void ClearButtonClick(object sender, RoutedEventArgs e)
         {
-            var message = RandomCustomMessage();
-            notificationManager.Show(message, NotificationArea);
+            await ExecuteAsync(
+                () => _notificationManager.ClearAsync(SelectedTarget),
+                "当前目标中的通知已清除。");
         }
 
-        private void CustomNotificationButtonClick(object sender, RoutedEventArgs e)
+        private void comb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            CustomNotification userControlMessage = new CustomNotification();
-
-            notificationManager.Show(userControlMessage, NotificationArea, false, TimeSpan.MaxValue);
+            if (notificationArea != null)
+            {
+                notificationArea.Position = (NotificationPosition)((ComboBox)sender).SelectedIndex;
+            }
         }
 
-        private void MessageButtonClick(object sender, RoutedEventArgs e)
+        private async void CustomButtonClick(object sender, RoutedEventArgs e)
         {
-            notificationManager.Show("title", NotificationArea);
+            await ExecuteAsync(
+                async () => await ShowSampleAsync(RandomCustomMessage()),
+                CurrentSelectionSummary);
         }
 
-        private void MessageWithTitleButtonClick(object sender, RoutedEventArgs e)
+        private async void CustomNotificationButtonClick(object sender, RoutedEventArgs e)
         {
-            Random random = new Random();
-            var type = (Enums.NotificationType)random.Next(0, 4);
-            notificationManager.Show("title", "message", type, NotificationArea);
+            await ExecuteAsync(
+                async () => await ShowSampleAsync(new CustomNotification(), expirationTime: TimeSpan.MaxValue),
+                $"{CurrentSelectionSummary} 这是永久通知，不会自动关闭。");
         }
 
-        private void UserControlMessageButtonClick(object sender, RoutedEventArgs e)
+        private async void MessageButtonClick(object sender, RoutedEventArgs e)
         {
-            UserControlMessage userControlMessage = new UserControlMessage();
+            await ExecuteAsync(
+                async () => await ShowSampleAsync("普通消息"),
+                CurrentSelectionSummary);
+        }
 
-            notificationManager.Show(userControlMessage, NotificationArea,false);
+        private async void MessageWithTitleButtonClick(object sender, RoutedEventArgs e)
+        {
+            await ExecuteAsync(
+                async () => await ShowSampleAsync(new NotificationContent
+                {
+                    Title = "操作结果",
+                    Message = "这是一条带标题和语义类型的消息。",
+                    Type = (NotificationType)Random.Shared.Next(0, 4),
+                }),
+                CurrentSelectionSummary);
+        }
+
+        private async void UserControlMessageButtonClick(object sender, RoutedEventArgs e)
+        {
+            await ExecuteAsync(
+                async () => await ShowSampleAsync(new UserControlMessage()),
+                CurrentSelectionSummary);
         }
     }
 }
