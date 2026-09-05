@@ -20,6 +20,8 @@ namespace Notifications
         private readonly NotificationOverlayHost _overlayHost;
         private readonly NotificationStore _notifications = new NotificationStore();
         private int _disposed;
+        private readonly TaskCompletionSource<object?> _disposeCompletion =
+            new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         /// <summary>Initializes a manager using legacy process-wide defaults.</summary>
         public NotificationManager(Dispatcher? dispatcher = null)
@@ -36,7 +38,8 @@ namespace Notifications
             NotificationConstants.ApplyConfiguredApplicationResources();
         }
 
-        /// <summary>Raised when a background legacy <see cref="Show"/> or <see cref="Clear"/> operation fails.</summary>
+        /// <summary>Raised when a background legacy <see cref="Show"/>, <see cref="Clear"/>,
+        /// or fire-and-forget <see cref="Dispose"/> operation fails.</summary>
         public event EventHandler<NotificationManagerErrorEventArgs>? Error;
 
         /// <summary>Clears overlay notifications or notifications in the named application area.</summary>
@@ -113,35 +116,62 @@ namespace Notifications
                 : ShowOnDispatcherAsync(request, cancellationToken);
         }
 
-        /// <summary>Releases overlay windows and closes notifications created by this manager.</summary>
+        /// <summary>Starts closing this manager's notifications and releasing its overlay windows.
+        /// Use <see cref="DisposeAsync"/> to await completion before shutting down the Dispatcher.</summary>
         /// <inheritdoc />
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref _disposed, 1) != 0)
-            {
-                return;
-            }
+            _ = ObserveDisposalAsync(DisposeAsync());
+        }
 
-            if (_dispatcher.CheckAccess())
+        /// <summary>Closes this manager's notifications, awaits their closing animations,
+        /// and releases overlay windows. Repeated calls return the same task.
+        /// Call before the owning Dispatcher shuts down.</summary>
+        public Task DisposeAsync()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) == 0)
             {
-                DisposeCore();
+                _ = CompleteDisposalAsync();
+                GC.SuppressFinalize(this);
             }
-            else if (!_dispatcher.HasShutdownStarted && !_dispatcher.HasShutdownFinished)
+            return _disposeCompletion.Task;
+        }
+
+        private async Task CompleteDisposalAsync()
+        {
+            try
             {
-                _dispatcher.BeginInvoke(new Action(() =>
+                if (_dispatcher.HasShutdownStarted || _dispatcher.HasShutdownFinished)
                 {
-                    try
-                    {
-                        DisposeCore();
-                    }
-                    catch (Exception exception)
-                    {
-                        ReportError(NotificationManagerOperation.Dispose, exception);
-                    }
-                }));
+                    throw new InvalidOperationException("Dispose the notification manager before its Dispatcher shuts down.");
+                }
+                if (_dispatcher.CheckAccess())
+                {
+                    await DisposeCoreAsync();
+                }
+                else
+                {
+                    var cleanup = await _dispatcher.InvokeAsync(DisposeCoreAsync).Task;
+                    await cleanup;
+                }
+                _disposeCompletion.TrySetResult(null);
             }
+            catch (Exception exception)
+            {
+                _disposeCompletion.TrySetException(exception);
+            }
+        }
 
-            GC.SuppressFinalize(this);
+        private async Task ObserveDisposalAsync(Task disposal)
+        {
+            try
+            {
+                await disposal;
+            }
+            catch (Exception exception)
+            {
+                ReportError(NotificationManagerOperation.Dispose, exception);
+            }
         }
 
         private void ClearCore(string areaIdentifier)
@@ -185,7 +215,6 @@ namespace Notifications
                         existing.Update(request.Content, expirationTime);
                         return existing;
                     case NotificationDuplicateBehavior.Replace:
-                        existing.Close(NotificationCloseReason.Replaced);
                         break;
                 }
             }
@@ -193,19 +222,7 @@ namespace Notifications
             Notification? notification;
             if (request.Target.IsOverlay)
             {
-                var window = _overlayHost.GetOrCreate(request.Target);
-                if (!window.IsVisible)
-                {
-                    window.Show();
-                }
-
-                notification = window.ShowNotification(
-                    request.Content,
-                    request.CloseOnClick,
-                    expirationTime,
-                    request.OnClick,
-                    request.OnClose,
-                    displayOptions);
+                notification = _overlayHost.Show(request, expirationTime, displayOptions);
             }
             else
             {
@@ -237,6 +254,13 @@ namespace Notifications
 
             var handle = new NotificationHandle(notification);
             _notifications.Add(handle, request.Tag);
+            if (request.DuplicateBehavior == NotificationDuplicateBehavior.Replace)
+            {
+                if (existing != null)
+                {
+                    _ = existing.Close(NotificationCloseReason.Replaced);
+                }
+            }
             return handle;
         }
 
@@ -339,10 +363,20 @@ namespace Notifications
             }));
         }
 
-        private void DisposeCore()
+        private async Task DisposeCoreAsync()
         {
-            _notifications.CloseAll(NotificationCloseReason.ManagerDisposed);
-            _overlayHost.CloseAll();
+            if (SynchronizationContext.Current is not DispatcherSynchronizationContext)
+            {
+                await Dispatcher.Yield(DispatcherPriority.Normal);
+            }
+            try
+            {
+                await _notifications.CloseAllAsync(NotificationCloseReason.ManagerDisposed);
+            }
+            finally
+            {
+                _overlayHost.CloseAll();
+            }
         }
 
         private void ReportError(NotificationManagerOperation operation, Exception exception)

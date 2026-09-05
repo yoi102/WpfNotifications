@@ -67,7 +67,7 @@ internal static class PackageApiSmoke
         _ = await handle.Completion;
         _ = await manager.ShowOverlayAsync("shortcut");
 
-        var area = new Notifications.Controls.NotificationArea();
+        var area = new Notifications.Controls.NotificationArea { ClearOnUnload = true };
         _ = area.Show(
             "direct area API",
             TimeSpan.FromSeconds(1),
@@ -79,6 +79,7 @@ internal static class PackageApiSmoke
 
         var notification = new Notifications.Controls.Notification();
         notification.ExpirationScheduled += (_, _) => { };
+        await manager.DisposeAsync();
     }
 }
 '@

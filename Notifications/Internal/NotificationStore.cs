@@ -50,7 +50,7 @@ namespace Notifications.Internal
                 TaskScheduler.Default);
         }
 
-        public void CloseAll(NotificationCloseReason reason)
+        public Task CloseAllAsync(NotificationCloseReason reason)
         {
             NotificationHandle[] handles;
             lock (_syncRoot)
@@ -59,10 +59,7 @@ namespace Notifications.Internal
                 _tags.Clear();
             }
 
-            foreach (var handle in handles)
-            {
-                handle.Close(reason);
-            }
+            return Task.WhenAll(handles.Select(handle => handle.Close(reason)));
         }
 
         private void Remove(NotificationHandle handle, string? tag)

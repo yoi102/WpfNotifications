@@ -1,4 +1,5 @@
 using Notifications.Enums;
+using Notifications.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +18,40 @@ namespace Notifications.Internal
             _options = options;
         }
 
-        public NotificationsOverlayWindow GetOrCreate(NotificationTarget target)
+        // Window creation and rollback belong to the host, not the manager.
+        public Notification? Show(NotificationRequest request, TimeSpan expirationTime, NotificationDisplayOptions displayOptions)
         {
+            var window = GetOrCreate(request.Target, out var created);
+            try
+            {
+                if (!window.IsVisible)
+                {
+                    window.Show();
+                }
+
+                var notification = window.ShowNotification(request.Content, request.CloseOnClick,
+                    expirationTime, request.OnClick, request.OnClose, displayOptions);
+                if (notification is null && created)
+                {
+                    window.Close();
+                }
+                return notification;
+            }
+            catch
+            {
+                if (created)
+                {
+                    window.Close();
+                }
+                throw;
+            }
+        }
+
+        internal int WindowCount => _windows.Count;
+
+        private NotificationsOverlayWindow GetOrCreate(NotificationTarget target, out bool created)
+        {
+            created = false;
             var monitor = MonitorHelper.Resolve(target);
             var key = new OverlayKey(monitor.Handle, _options.Position);
             if (_windows.TryGetValue(key, out var existingWindow))
@@ -35,6 +68,7 @@ namespace Notifications.Internal
                 }
             };
             _windows.Add(key, window);
+            created = true;
             return window;
         }
 

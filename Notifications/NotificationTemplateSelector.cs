@@ -7,45 +7,23 @@ namespace Notifications
     /// <summary>Selects built-in templates for strings and <see cref="NotificationContent"/> values.</summary>
     public class NotificationTemplateSelector : DataTemplateSelector
     {
-        private DataTemplate? _defaultNotificationTemplate;
-        private DataTemplate? _defaultStringTemplate;
-
         /// <inheritdoc />
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            if (_defaultStringTemplate == null && _defaultNotificationTemplate == null)
+            var key = item is string ? "DefaultStringTemplate"
+                : item is NotificationContent ? "DefaultNotificationTemplate" : null;
+            if (key is null)
             {
-                GetTemplatesFromResources((FrameworkElement)container);
+                return base.SelectTemplate(item, container)!;
             }
 
-            if (item is string)
+            // A shared selector must resolve resources in the current host's scope.
+            if (container is FrameworkElement element && element.TryFindResource(key) is DataTemplate template)
             {
-                if (_defaultStringTemplate == null)
-                {
-                    throw new ArgumentNullException(nameof(_defaultStringTemplate));
-                }
-
-                return _defaultStringTemplate;
-            }
-            if (item is NotificationContent)
-            {
-                if (_defaultNotificationTemplate == null)
-                {
-                    throw new ArgumentNullException(nameof(_defaultNotificationTemplate));
-                }
-                return _defaultNotificationTemplate;
+                return template;
             }
 
-            return base.SelectTemplate(item, container)!;
-        }
-
-        private void GetTemplatesFromResources(FrameworkElement container)
-        {
-            _defaultStringTemplate =
-                    container?.FindResource("DefaultStringTemplate") as DataTemplate;
-
-            _defaultNotificationTemplate =
-                    container?.FindResource("DefaultNotificationTemplate") as DataTemplate;
+            throw new InvalidOperationException($"A DataTemplate resource named '{key}' is required in the notification's resource scope.");
         }
     }
 }

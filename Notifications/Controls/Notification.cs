@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Notifications.Enums;
 using Notifications.Internal;
 
@@ -94,6 +95,7 @@ namespace Notifications.Controls
         private ButtonBase? _closeButton;
         private readonly NotificationExpirationTimer _expirationTimer = new NotificationExpirationTimer();
         private Task? _closeTask;
+        internal event EventHandler? Closed;
         private bool _isPointerOver;
         private bool _hasKeyboardFocus;
         private NotificationCloseReason _closeReason = NotificationCloseReason.Programmatic;
@@ -110,6 +112,7 @@ namespace Notifications.Controls
         /// <summary>Initializes a notification control.</summary>
         public Notification()
         {
+            _expirationTimer.Cancelled += () => _countdownBar?.BeginAnimation(WidthProperty, null);
             AnimationsEnabled = SystemParameters.ClientAreaAnimation;
 #if !NET47
             AutomationProperties.SetLiveSetting(this, AutomationLiveSetting.Polite);
@@ -264,8 +267,9 @@ namespace Notifications.Controls
             _closeReason = closeReason;
             _expirationTimer.Stop(false);
             _countdownBar?.BeginAnimation(WidthProperty, null);
-            RaiseEvent(new RoutedEventArgs(NotificationCloseInvokedEvent));
-            _closeTask = CompleteCloseAsync();
+            var closeCompletion = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _closeTask = closeCompletion.Task;
+            _ = CompleteCloseAsync(closeCompletion);
             return _closeTask;
         }
 
@@ -316,7 +320,10 @@ namespace Notifications.Controls
             _ = ScheduleCloseAsync(expirationTime);
         }
 
-        /// <summary>Schedules automatic closing and completes after expiration and closing.</summary>
+        /// <summary>Schedules automatic closing. Completes after closing, cancellation of the schedule,
+        /// or replacement by another schedule; permanent notifications complete immediately.
+        /// Cancelling the schedule keeps the notification open. Use the notification handle's
+        /// completion task to observe dismissal.</summary>
         public virtual Task ScheduleCloseAsync(TimeSpan expirationTime, CancellationToken cancellationToken = default)
         {
             VerifyAccess();
@@ -328,6 +335,7 @@ namespace Notifications.Controls
             }
 
             _expirationTimer.Stop(true);
+            _countdownBar?.BeginAnimation(WidthProperty, null);
             ExpirationTime = expirationTime;
             IsPermanent = expirationTime == TimeSpan.MaxValue;
             RaiseEvent(new RoutedEventArgs(ExpirationScheduledEvent));
@@ -355,17 +363,46 @@ namespace Notifications.Controls
             }
         }
 
-        private async Task CompleteCloseAsync()
+        private async Task CompleteCloseAsync(TaskCompletionSource<object?> closeCompletion)
         {
+            Exception? closeError = null;
             try
             {
+                if (SynchronizationContext.Current is not DispatcherSynchronizationContext)
+                {
+                    await Dispatcher.Yield(DispatcherPriority.Normal);
+                }
+                RaiseEvent(new RoutedEventArgs(NotificationCloseInvokedEvent));
                 await NotificationDelay.DelayAsync(AnimationsEnabled ? ClosingAnimationDuration : TimeSpan.Zero, CancellationToken.None);
                 RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
             }
+            catch (Exception exception)
+            {
+                closeError = exception;
+            }
             finally
             {
-                _completion.TrySetResult(_closeReason);
-                _expirationTimer.Complete();
+                try
+                {
+                    Closed?.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception exception)
+                {
+                    closeError = closeError is null ? exception : new AggregateException(closeError, exception);
+                }
+                finally
+                {
+                    _completion.TrySetResult(_closeReason);
+                    _expirationTimer.Complete();
+                    if (closeError is null)
+                    {
+                        closeCompletion.TrySetResult(null);
+                    }
+                    else
+                    {
+                        closeCompletion.TrySetException(closeError);
+                    }
+                }
             }
         }
 

@@ -28,7 +28,7 @@ jobs:
       - name: Install .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
 
       - name: Restore
         run: dotnet restore Notifications.sln
@@ -46,7 +46,10 @@ jobs:
       - name: Smoke test NuGet package
         if: matrix.configuration == 'Release'
         shell: pwsh
-        run: ./eng/SmokeTestPackage.ps1 -PackageDirectory ./artifacts -PackageVersion 1.1.0
+        run: |
+          $version = dotnet msbuild Notifications/Notifications.csproj -getProperty:PackageVersion
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to resolve the package version.' }
+          ./eng/SmokeTestPackage.ps1 -PackageDirectory ./artifacts -PackageVersion $version.Trim()
 
       - name: Upload NuGet packages
         if: matrix.configuration == 'Release'

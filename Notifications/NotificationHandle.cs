@@ -29,12 +29,9 @@ namespace Notifications
 
         internal bool IsClosing => _notification?.IsClosing ?? true;
 
-        internal void Close(Enums.NotificationCloseReason reason)
+        internal Task Close(Enums.NotificationCloseReason reason)
         {
-            if (_notification != null)
-            {
-                _ = _notification.CloseAsync(reason);
-            }
+            return _notification?.CloseAsync(reason) ?? Task.CompletedTask;
         }
 
         internal void Update(object content, TimeSpan expirationTime)
@@ -79,7 +76,7 @@ namespace Notifications
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            if (_notification is null || _notification.IsClosing)
+            if (_notification is null)
             {
                 throw new InvalidOperationException("The notification has already closed.");
             }
@@ -91,14 +88,24 @@ namespace Notifications
 
             if (_notification.Dispatcher.CheckAccess())
             {
-                _notification.Content = content;
+                UpdateContent(content);
                 return;
             }
 
             await _notification.Dispatcher.InvokeAsync(
-                () => _notification.Content = content,
+                () => UpdateContent(content),
                 DispatcherPriority.Normal,
                 cancellationToken).Task;
+        }
+
+        private void UpdateContent(object content)
+        {
+            if (_notification is null || _notification.IsClosing || _notification.Completion.IsCompleted)
+            {
+                throw new InvalidOperationException("The notification has already closed.");
+            }
+
+            _notification.Content = content;
         }
     }
 }

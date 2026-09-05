@@ -160,6 +160,14 @@ var manager = new NotificationManager(new NotificationManagerOptions
 using var manager = new NotificationManager(options);
 ```
 
+`Dispose()` 发起清理；如果需要确认关闭动画和 Overlay 回收完成，请在 UI Dispatcher 退出前调用 `await manager.DisposeAsync()`。该方法在所有目标框架上返回 `Task`，也允许后台线程调用。重复调用会等待同一轮清理。
+
+`NotificationArea.ClearOnUnload` 默认是 `false`，临时卸载或重新挂载不会清空通知。对页面退出后需要清理的区域，可设置 `ClearOnUnload="True"`；整个窗口或服务退出时仍应释放其拥有的管理器。
+
+`ScheduleCloseAsync` 观察的是一次定时安排：取消令牌会停止倒计时并保留通知，重新安排会结束旧任务，永久通知立即返回已完成任务。需要等待通知真正关闭时，使用 `handle.Completion`。公开关闭事件抛异常时，`CloseAsync` 会返回失败任务，但内部移除和生命周期完成仍会执行。
+
+内部职责和维护约束见 [架构说明](docs/ARCHITECTURE.md)。
+
 为兼容旧代码，`NotificationConstants` 仍然有效；即使在 `Application` 创建前设置，管理器初始化时也会同步已配置的主题资源。
 
 ## 易用性和无障碍

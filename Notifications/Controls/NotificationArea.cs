@@ -17,6 +17,10 @@ namespace Notifications.Controls
         public static readonly DependencyProperty AllowRemovingPermanentOnOverflowProperty =
             DependencyProperty.Register(nameof(AllowRemovingPermanentOnOverflow), typeof(bool), typeof(NotificationArea), new PropertyMetadata(true));
 
+        /// <summary>Identifies the <see cref="ClearOnUnload"/> dependency property.</summary>
+        public static readonly DependencyProperty ClearOnUnloadProperty =
+            DependencyProperty.Register(nameof(ClearOnUnload), typeof(bool), typeof(NotificationArea), new PropertyMetadata(false));
+
         /// <summary>Identifies the <see cref="Identifier"/> dependency property.</summary>
         public static readonly DependencyProperty IdentifierProperty =
             DependencyProperty.Register(
@@ -59,6 +63,14 @@ namespace Notifications.Controls
         }
 
         internal event EventHandler? ItemsChanged;
+
+        /// <summary>Gets or sets whether unloading starts closing hosted notifications.
+        /// Defaults to false so temporary reparenting or navigation can preserve notifications.</summary>
+        public bool ClearOnUnload
+        {
+            get => (bool)GetValue(ClearOnUnloadProperty);
+            set => SetValue(ClearOnUnloadProperty, value);
+        }
 
         /// <summary>Gets or sets whether overflow may evict permanent notifications.</summary>
         public bool AllowRemovingPermanentOnOverflow
@@ -137,6 +149,15 @@ namespace Notifications.Controls
                 throw new InvalidOperationException("The NotificationArea template must contain a Panel named PART_Items.");
             }
 
+            if (_items != null && !ReferenceEquals(_items, itemsPanel.Children))
+            {
+                var existingItems = _items.OfType<UIElement>().ToArray();
+                _items.Clear();
+                foreach (var item in existingItems)
+                {
+                    itemsPanel.Children.Add(item);
+                }
+            }
             _items = itemsPanel.Children;
             ItemsChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -208,6 +229,10 @@ namespace Notifications.Controls
             {
                 throw new InvalidOperationException("A Notification instance that already has a visual parent cannot be shown again.");
             }
+            if (notification.IsClosing || notification.Completion.IsCompleted)
+            {
+                throw new InvalidOperationException("A closed Notification instance cannot be shown again.");
+            }
 
             displayOptions.ApplyTo(notification);
             if (notification.Style is null)
@@ -215,7 +240,7 @@ namespace Notifications.Controls
                 notification.Style = (Style)FindResource(typeof(Notification));
             }
 
-            notification.NotificationClosed += OnNotificationClosed;
+            notification.Closed += OnNotificationClosed;
             if (onClose != null)
             {
                 notification.NotificationClosed += (_, _) => onClose();
@@ -250,7 +275,17 @@ namespace Notifications.Controls
             _items.Add(notificationContainer);
             RemoveOverflowNotification();
             ItemsChanged?.Invoke(this, EventArgs.Empty);
-            notification.ScheduleClose(expirationTime);
+            try
+            {
+                notification.ScheduleClose(expirationTime);
+            }
+            catch
+            {
+                // A custom scheduling override or application event may reject the show.
+                // Close also releases the area subscription and any started timer.
+                _ = notification.CloseAsync();
+                throw;
+            }
             return notification;
         }
 
@@ -289,8 +324,12 @@ namespace Notifications.Controls
             return notification;
         }
 
-        private void OnNotificationClosed(object sender, RoutedEventArgs routedEventArgs)
+        private void OnNotificationClosed(object? sender, EventArgs eventArgs)
         {
+            if (sender is Notification closedNotification)
+            {
+                closedNotification.Closed -= OnNotificationClosed;
+            }
             if (_items != null && sender is Notification notification && notification.Parent is NotificationContainer container)
             {
                 _items.Remove(container);
@@ -333,6 +372,10 @@ namespace Notifications.Controls
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             NotificationAreaRegistry.Unregister(this);
+            if (ClearOnUnload)
+            {
+                Clear();
+            }
         }
     }
 }
