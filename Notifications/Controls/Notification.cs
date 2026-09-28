@@ -19,6 +19,7 @@ namespace Notifications.Controls
     /// <summary>Displays notification content and manages its close lifecycle.</summary>
     [TemplatePart(Name = "PART_CountdownBar", Type = typeof(Rectangle))]
     [TemplatePart(Name = "PART_CloseButton", Type = typeof(ButtonBase))]
+    [TemplatePart(Name = "PART_AnimationRoot", Type = typeof(FrameworkElement))]
     public class Notification : ContentControl
     {
         /// <summary>Identifies the <see cref="CountdownBarFill"/> dependency property.</summary>
@@ -39,8 +40,22 @@ namespace Notifications.Controls
                 nameof(ClosingAnimationDuration),
                 typeof(TimeSpan),
                 typeof(Notification),
-                new PropertyMetadata(TimeSpan.FromMilliseconds(400)),
+                new PropertyMetadata(TimeSpan.FromMilliseconds(260)),
                 value => (TimeSpan)value >= TimeSpan.Zero);
+
+        /// <summary>Identifies the <see cref="OpeningAnimationDuration"/> dependency property.</summary>
+        public static readonly DependencyProperty OpeningAnimationDurationProperty = DependencyProperty.Register(
+            nameof(OpeningAnimationDuration), typeof(TimeSpan), typeof(Notification),
+            new PropertyMetadata(TimeSpan.FromMilliseconds(340)), value => (TimeSpan)value >= TimeSpan.Zero);
+
+        /// <summary>Identifies the <see cref="AnimationDistance"/> dependency property.</summary>
+        public static readonly DependencyProperty AnimationDistanceProperty = DependencyProperty.Register(
+            nameof(AnimationDistance), typeof(double), typeof(Notification), new PropertyMetadata(24d),
+            value => (double)value >= 0 && !double.IsNaN((double)value) && !double.IsInfinity((double)value));
+
+        /// <summary>Identifies the <see cref="DeferEntranceAnimation"/> dependency property.</summary>
+        public static readonly DependencyProperty DeferEntranceAnimationProperty = DependencyProperty.Register(
+            nameof(DeferEntranceAnimation), typeof(bool), typeof(Notification), new PropertyMetadata(false));
 
         /// <summary>Identifies the <see cref="PauseOnHover"/> dependency property.</summary>
         public static readonly DependencyProperty PauseOnHoverProperty =
@@ -95,6 +110,8 @@ namespace Notifications.Controls
         private ButtonBase? _closeButton;
         private readonly NotificationExpirationTimer _expirationTimer = new NotificationExpirationTimer();
         private Task? _closeTask;
+        private NotificationMotion? _motion;
+        private bool _openingStarted;
         internal event EventHandler? Closed;
         private bool _isPointerOver;
         private bool _hasKeyboardFocus;
@@ -182,11 +199,33 @@ namespace Notifications.Controls
             set => SetValue(ExpirationTimeProperty, value);
         }
 
-        /// <summary>Gets or sets how long closing animation completion is awaited.</summary>
+        /// <summary>Gets or sets the visual-only closing duration (260 ms by default).</summary>
         public TimeSpan ClosingAnimationDuration
         {
             get => (TimeSpan)GetValue(ClosingAnimationDurationProperty);
             set => SetValue(ClosingAnimationDurationProperty, value);
+        }
+
+        /// <summary>Gets or sets the visual-only entrance duration (340 ms by default).</summary>
+        public TimeSpan OpeningAnimationDuration
+        { get => (TimeSpan)GetValue(OpeningAnimationDurationProperty); set => SetValue(OpeningAnimationDurationProperty, value); }
+
+        /// <summary>Gets or sets the vertical slide distance in DIPs; does not affect layout size.</summary>
+        public double AnimationDistance
+        { get => (double)GetValue(AnimationDistanceProperty); set => SetValue(AnimationDistanceProperty, value); }
+
+        /// <summary>Gets or sets whether a custom host calls <see cref="PlayEntranceAnimation"/> after positioning.</summary>
+        public bool DeferEntranceAnimation
+        { get => (bool)GetValue(DeferEntranceAnimationProperty); set => SetValue(DeferEntranceAnimationProperty, value); }
+
+        /// <summary>Reveals this notification once, after a custom host has measured and positioned it.</summary>
+        public void PlayEntranceAnimation()
+        {
+            VerifyAccess();
+            if (_openingStarted || IsClosing) return;
+            ApplyTemplate();
+            _openingStarted = true;
+            _motion?.Enter(OpeningAnimationDuration, AnimationDistance, AnimationsEnabled && SystemParameters.ClientAreaAnimation);
         }
 
         /// <summary>Gets or sets whether this notification is closing.</summary>
@@ -276,6 +315,7 @@ namespace Notifications.Controls
         /// <inheritdoc />
         public override void OnApplyTemplate()
         {
+            _motion?.Dispose();
             if (_countdownBar != null)
             {
                 _countdownBar.Loaded -= OnCountdownBarLoaded;
@@ -287,6 +327,8 @@ namespace Notifications.Controls
             }
 
             base.OnApplyTemplate();
+            _motion = new NotificationMotion(GetTemplateChild("PART_AnimationRoot") as FrameworkElement ?? this,
+                !_openingStarted || IsClosing);
             _countdownBar = GetTemplateChild("PART_CountdownBar") as Rectangle;
             if (_countdownBar != null)
             {
@@ -373,7 +415,9 @@ namespace Notifications.Controls
                     await Dispatcher.Yield(DispatcherPriority.Normal);
                 }
                 RaiseEvent(new RoutedEventArgs(NotificationCloseInvokedEvent));
-                await NotificationDelay.DelayAsync(AnimationsEnabled ? ClosingAnimationDuration : TimeSpan.Zero, CancellationToken.None);
+                if (_motion != null)
+                    await _motion.ExitAsync(ClosingAnimationDuration, AnimationDistance,
+                        AnimationsEnabled && SystemParameters.ClientAreaAnimation);
                 RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
             }
             catch (Exception exception)
@@ -490,24 +534,8 @@ namespace Notifications.Controls
 
         private void OnNotificationLoaded(object sender, RoutedEventArgs e)
         {
-            if (!AnimationsEnabled)
-            {
-                BeginAnimation(OpacityProperty, null);
-                Opacity = 1;
-                if (LayoutTransform is ScaleTransform scale)
-                {
-                    if (scale.IsFrozen)
-                    {
-                        scale = scale.Clone();
-                        LayoutTransform = scale;
-                    }
-
-                    scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-                    scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                    scale.ScaleX = 1;
-                    scale.ScaleY = 1;
-                }
-            }
+            if (!DeferEntranceAnimation)
+                Dispatcher.BeginInvoke(new Action(PlayEntranceAnimation), DispatcherPriority.Loaded);
 
 #if !NET47
             var peer = UIElementAutomationPeer.CreatePeerForElement(this) ?? new FrameworkElementAutomationPeer(this);

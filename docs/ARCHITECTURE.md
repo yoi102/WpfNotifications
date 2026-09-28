@@ -10,6 +10,7 @@
 | `NotificationArea` | 管理容器、排列、溢出和可选卸载清理 |
 | `Notification` | 控件外观、交互、关闭状态和生命周期完成 |
 | `NotificationExpirationTimer` | UI 线程上的定时、暂停、恢复和取消状态 |
+| `NotificationMotion` | 模板无关的视觉动画；保持布局尺寸、衔接中途退出，通过动画完成或卸载结束关闭等待 |
 | `NotificationStore` | 活动句柄与标签索引；锁保护后台完成回调对索引的访问 |
 
 ## 关键约束

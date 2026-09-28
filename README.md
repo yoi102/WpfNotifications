@@ -201,6 +201,20 @@ manager.Show("需要手动处理", "main_window", expirationTime: TimeSpan.MaxVa
 <FontWeight x:Key="Notifications.DefaultNotificationFontWeight">SemiBold</FontWeight>
 ```
 
+## 入场和退出动画（1.2.0）
+
+动画由 `Notification` 的生命周期统一驱动，默认模板和自定义模板均可使用，不再依赖默认样式的 `EventTrigger`。入场为 340 ms 淡入、24 DIP 上移，退出为 260 ms 淡出、下移；只改变 `Opacity` 与 `RenderTransform`，不压缩布局尺寸。关闭发生在入场途中时，从当前画面继续退出，`CloseAsync()` 等到动画完成后才移除通知。
+
+```xaml
+<notifications:Notification OpeningAnimationDuration="0:0:0.34"
+                            ClosingAnimationDuration="0:0:0.26"
+                            AnimationDistance="24" />
+```
+
+自定义 `ControlTemplate` 建议将最外层视觉元素命名为 `PART_AnimationRoot`；没有该部件时会动画整个控件。无需再写淡入淡出 Storyboard。已有自定义动画的应用应移除重复 Storyboard，或用 `AnimationsEnabled="False"` 关闭库的动效。禁用动画、系统关闭客户端动画或时长为零时立即到达最终状态。
+
+独立透明窗口应先测量、定位，再显示卡片：设置 `DeferEntranceAnimation="True"`，等宿主就位后调用 `notification.PlayEntranceAnimation()`。该方法只播放一次；切换位置或恢复窗口不会重复入场。普通通知无需设置它。宿主在退出过程中卸载时，关闭任务会完成，不会一直等待不可见的动画。
+
 ## 目标框架
 
 - 主支持：.NET 10、.NET 8（Windows/WPF）

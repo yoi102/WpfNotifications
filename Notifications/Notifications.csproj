@@ -32,8 +32,8 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <Version>1.1.0</Version>
-    <PackageReleaseNotes>Adds async handles, target-explicit APIs, per-notification close-button and countdown-bar controls, compact multi-monitor overlays, accessibility defaults, deduplication, disposal, automatic themes, and cross-framework tests.</PackageReleaseNotes>
+    <Version>1.2.0</Version>
+    <PackageReleaseNotes>Adds template-independent fade/slide animations, configurable entrance/exit duration and distance, deferred entrance for custom hosts, interrupted-animation continuity, and completion-driven closing without layout scaling. Includes async disposal and lifecycle cleanup improvements.</PackageReleaseNotes>
   </PropertyGroup>
     
   <ItemGroup>

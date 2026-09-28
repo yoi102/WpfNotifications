@@ -77,7 +77,14 @@ internal static class PackageApiSmoke
                 ShowCountdownBar = false,
             });
 
-        var notification = new Notifications.Controls.Notification();
+        var notification = new Notifications.Controls.Notification
+        {
+            OpeningAnimationDuration = TimeSpan.FromMilliseconds(340),
+            ClosingAnimationDuration = TimeSpan.FromMilliseconds(260),
+            AnimationDistance = 24,
+            DeferEntranceAnimation = true,
+        };
+        notification.PlayEntranceAnimation();
         notification.ExpirationScheduled += (_, _) => { };
         await manager.DisposeAsync();
     }
